@@ -1,0 +1,11 @@
+[package]
+name = "AoC19"
+version = "0.1.0"
+authors = ["Tim Armstrong <armstrongtimmy@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "day1"
+path = "src/day1.rs"
+
+[dependencies]
