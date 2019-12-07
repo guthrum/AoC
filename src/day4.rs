@@ -1,4 +1,3 @@
-
 fn check_same(v1: &u32, v2: &u32) -> bool {
     v1 == v2
 }
@@ -87,6 +86,6 @@ fn solve_part2(lower: i32, upper: i32) -> u32 {
 }
 
 fn main() {
-    // println!("{}", solve_part1(278384, 824795));
+    println!("{}", solve_part1(278384, 824795));
     println!("{}", solve_part2(278384, 824795));
 }
