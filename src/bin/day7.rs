@@ -1,4 +1,5 @@
 use lib::int_code::{read_file, machine::Machine, machine};
+use lib::permutation;
 
 enum Phase {
     Ready,
@@ -39,7 +40,7 @@ impl machine::StdIo for AmpIo {
                 self.phase = Phase::ReadInput;
                 self.input_sgnal
             },
-            _ => panic!("unexpected reading in state")
+            _ => panic!("invalid state for reading.")
         }
     }
 
@@ -59,25 +60,55 @@ impl AmpController {
         }
     }
 
-    fn execute_seq(&self, sequence: Vec<i32>, intial_input: i32) -> i32 {
+    fn execute_seq(&self, sequence: &Vec<i32>, intial_input: i32) -> i32 {
         let mut last_output = intial_input;
 
         for i in 0..5 {
             let phase = sequence.get(i).expect("no phase found");
-            println!("running amp {} in -> {}, phase -> {}", i, last_output, phase);
             let mut amp_io = AmpIo::new(phase.clone(), last_output);
             let mut amp = Machine::new(self.program.clone(), &mut amp_io);
             amp.execute();
             last_output = amp_io.get_outputs().get(0).expect("no machine output").clone();
         }
-
         last_output
     }
 
+    fn optimise_phases_1(&self) -> (Vec<i32>, i32) {
+        let mut phases = Vec::new();
+        let mut score = 0;
+
+        for permutation in permutation::permutations(vec![0, 1, 2, 3, 4]) {
+            let result = self.execute_seq(&permutation, 0);
+            if result > score {
+                score = result;
+                phases = permutation;
+            }
+        }
+
+        (phases, score)
+    }
+
+    fn optimise_phases_2(&self) -> (Vec<i32>, i32) {
+        let mut phases = Vec::new();
+        let mut score = 0;
+
+        for permutation in permutation::permutations(vec![5, 6, 7, 8, 9]) {
+            let result = self.execute_seq(&permutation, 0);
+            if result > score {
+                score = result;
+                phases = permutation;
+            }
+        }
+
+        (phases, score)
+    }
+
 }
+
+
 fn main() {
     let input = read_file("/home/tim/projects/AoC19/resources/day7input").expect("failed to read input");
     let amp_controller = AmpController::new(input);
-    let seq = vec![0,1,2,3,4];
-    println!("final output = {}", amp_controller.execute_seq(seq, 0));
+    println!("final output = {:?}", amp_controller.optimise_phases_1());
+
 }
