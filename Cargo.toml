@@ -4,28 +4,37 @@ version = "0.1.0"
 authors = ["Tim Armstrong <armstrongtimmy@gmail.com>"]
 edition = "2018"
 
+[lib]
+name = "lib"
+path = "src/lib.rs"
+
+
 [[bin]]
 name = "day1"
-path = "src/day1.rs"
+path = "src/bin/day1.rs"
 
 [[bin]]
 name = "day2"
-path = "src/day2.rs"
+path = "src/bin/day2.rs"
 
 [[bin]]
 name = "day3"
-path = "src/day3.rs"
+path = "src/bin/day3.rs"
 
 [[bin]]
 name = "day4"
-path = "src/day4.rs"
+path = "src/bin/day4.rs"
 
 [[bin]]
 name = "day5"
-path = "src/day5.rs"
+path = "src/bin/day5.rs"
 
 [[bin]]
 name = "day6"
-path = "src/day6.rs"
+path = "src/bin/day6.rs"
+
+[[bin]]
+name = "day7"
+path = "src/bin/day7.rs"
 
 [dependencies]
