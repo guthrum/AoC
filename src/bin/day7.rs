@@ -8,14 +8,14 @@ enum Phase {
 }
 
 struct AmpIo {
-    phase_setting: i32,
-    input_sgnal: i32,
+    phase_setting: i64,
+    input_sgnal: i64,
     phase: Phase,
-    outputs: Vec<i32>,
+    outputs: Vec<i64>,
 }
 
 impl AmpIo {
-    fn new(phase_setting: i32, amp_input: i32) -> Self {
+    fn new(phase_setting: i64, amp_input: i64) -> Self {
         AmpIo {
             phase_setting,
             input_sgnal: amp_input,
@@ -24,13 +24,13 @@ impl AmpIo {
         }
     }
 
-    fn get_outputs(&self) -> &Vec<i32> {
+    fn get_outputs(&self) -> &Vec<i64> {
         &self.outputs
     }
 }
 
 impl machine::StdIo for AmpIo {
-    fn read(&mut self) -> i32 {
+    fn read(&mut self) -> i64 {
         match self.phase {
             Phase::Ready => {
                 self.phase = Phase::ReadSetting;
@@ -44,23 +44,23 @@ impl machine::StdIo for AmpIo {
         }
     }
 
-    fn write(&mut self, value: i32) {
+    fn write(&mut self, value: i64) {
         self.outputs.push(value);
     }
 }
 
 struct AmpController {
-    program: Vec<i32>,
+    program: Vec<i64>,
 }
 
 impl AmpController {
-    fn new(program: Vec<i32>) -> Self {
+    fn new(program: Vec<i64>) -> Self {
         AmpController {
             program,
         }
     }
 
-    fn execute_seq(&self, sequence: &Vec<i32>, intial_input: i32) -> i32 {
+    fn execute_seq(&self, sequence: &Vec<i64>, intial_input: i64) -> i64 {
         let mut last_output = intial_input;
 
         for i in 0..5 {
@@ -73,7 +73,7 @@ impl AmpController {
         last_output
     }
 
-    fn optimise_phases_1(&self) -> (Vec<i32>, i32) {
+    fn optimise_phases_1(&self) -> (Vec<i64>, i64) {
         let mut phases = Vec::new();
         let mut score = 0;
 
@@ -88,7 +88,7 @@ impl AmpController {
         (phases, score)
     }
 
-    fn optimise_phases_2(&self) -> (Vec<i32>, i32) {
+    fn optimise_phases_2(&self) -> (Vec<i64>, i64) {
         let mut phases = Vec::new();
         let mut score = 0;
 
