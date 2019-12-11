@@ -28,6 +28,24 @@ enum Command {
 
 type MachineMemoryType = i64;
 
+#[derive(Debug, Clone)]
+pub struct MachineError {
+    reason: String,
+}
+
+impl std::fmt::Display for MachineError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "machine failed error msg: {}", self.reason)
+    }
+}
+
+impl std::error::Error for MachineError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+}
+
+
 #[derive(Debug)]
 pub struct Machine {
     state: Vec<MachineMemoryType>,
@@ -103,7 +121,6 @@ impl Machine {
                 Self::_create_addressing_mode(op_vec.3, slice[3]),
             ), 4)),
             9 => {
-                println!("op 9: {} : {:?} {:?}", self.relative_base, op_vec, slice);
                 Some((Command::AdjustRelativeBase(
                     Self::_create_addressing_mode(op_vec.1, slice[1]),
                 ), 2))
@@ -117,10 +134,7 @@ impl Machine {
         match addressing_mode {
             AddressingMode::Register(pos) => self.state[pos],
             AddressingMode::Immediate(value) => value,
-            AddressingMode::Relative(value) => {
-                println!("rel {}+{}={}", value, self.relative_base, self.relative_base+value);
-                self.state[(self.relative_base + value) as usize]
-            }
+            AddressingMode::Relative(offset) => self.state[(self.relative_base + offset) as usize],
         }
     }
 
@@ -128,23 +142,20 @@ impl Machine {
         match addressing_mode {
             AddressingMode::Register(pos) => self.state[pos] = value,
             AddressingMode::Immediate(_) => panic!("can't write value."),
-            AddressingMode::Relative(value) => self.state[(self.relative_base + value) as usize] = value,
+            AddressingMode::Relative(offset) => self.state[(self.relative_base + offset) as usize] = value,
         }
     }
 
     fn _read_input(&mut self, addressing_mode: AddressingMode) {
-        println!("read: {:?} {}", addressing_mode, self.relative_base);
+        // println!("read: {:?} {}", addressing_mode, self.relative_base);
         match self.input.recv() {
-            Ok(input) => {
-                println!("read value {}", input);
-                self._write_memory(addressing_mode, input);
-            }
+            Ok(input) => self._write_memory(addressing_mode, input),
             Err(_) => panic!("input closed before machine finished"),
         }
     }
 
     fn _write_output(&mut self, addressing_mode: AddressingMode) {
-        println!("write: {:?} {}", addressing_mode, self.relative_base);
+        // println!("write: {:?} {}", addressing_mode, self.relative_base);
         match self.output.send(self._read_memory(addressing_mode)) {
             Ok(()) => {},
             Err(e) => panic!(format!("failed to send data: {}", e)),
@@ -157,14 +168,13 @@ impl Machine {
         test(arg1, arg2)
     }
 
-    pub fn execute(&mut self) {
+    pub fn execute(&mut self) -> Result<(), MachineError> {
         let mut program_counter = 0;
         let mut parsed_command = self._parse_slice(&self.state[program_counter .. program_counter+4]);
         while let Some(command) = parsed_command {
             match command.0 {
                 Command::End() => {
-                    println!("machine halt");
-                    return;
+                    return Ok(());
                 },
                 Command::Add(v1, v2, res) => {
                     self._write_memory(res, self._read_memory(v1) + self._read_memory(v2));
@@ -206,17 +216,21 @@ impl Machine {
                 },
                 Command::AdjustRelativeBase(amount_address) => {
                     let amount = self._read_memory(amount_address);
-                    println!("addr: {:?}, v: {}", amount_address, amount);
                     self.relative_base += amount;
                     program_counter += command.1;
                 }
             }
             parsed_command = self._parse_slice(&self.state[program_counter .. std::cmp::min(program_counter+4, self.state.len())]);
         }
+        Err(MachineError { reason: String::from("ran out of instructions.") } )
     }
 
-    pub fn read_memory(&self) -> &Vec<i64> {
+    pub fn read_memory(&self) -> &Vec<MachineMemoryType> {
         &self.state
+    }
+
+    pub fn read_relative_base(&self) -> MachineMemoryType {
+        self.relative_base
     }
 }
 
@@ -325,5 +339,27 @@ mod tests {
         let mut machine = Machine::new(vec![104,1125899906842624,99], input_rx, output_tx);
         machine.execute();
         assert_eq!(output_rx.recv().expect("failed to read output"), 1125899906842624);
+    }
+
+    #[test]
+    fn day9_part1() {
+        let (input_tx, input_rx) = mpsc::channel();
+        let (output_tx, output_rx) = mpsc::channel();
+        input_tx.send(1).expect("failed to send data");
+        let program = read_file("/home/tim/projects/AoC19/resources/day9input").expect("failed to read day 9 in");
+        let mut machine = Machine::new(program.clone(), input_rx, output_tx);
+        machine.execute();
+        assert_eq!(output_rx.try_recv().expect("expect output"), 3906448201);
+    }
+
+    #[test]
+    fn day9_part2() {
+        let (input_tx, input_rx) = mpsc::channel();
+        let (output_tx, output_rx) = mpsc::channel();
+        input_tx.send(2).expect("failed to send data");
+        let program = read_file("/home/tim/projects/AoC19/resources/day9input").expect("failed to read day 9 in");
+        let mut machine = Machine::new(program.clone(), input_rx, output_tx);
+        machine.execute();
+        assert_eq!(output_rx.try_recv().expect("expect output"), 59785);
     }
 }
