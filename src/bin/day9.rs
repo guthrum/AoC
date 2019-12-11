@@ -7,7 +7,7 @@ fn solve(program: Vec<i64>) {
     input_tx.send(1).expect("failed to send data");
     let mut machine = Machine::new(program, input_rx, output_tx);
     machine.execute();
-    for output in output_rx {
+    for output in output_rx.try_iter() {
         println!("{}", output);
     }
 }
