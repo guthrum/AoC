@@ -1,4 +1,5 @@
 use std::convert::{TryFrom};
+use std::sync::mpsc::{self, Sender, Receiver};
 
 static INSTRUCTION_LENGTH: usize = 5;
 static MEMORY_SIZE: usize = 4096;
@@ -25,44 +26,37 @@ enum Command {
     AdjustRelativeBase(AddressingMode),
 }
 
-pub trait StdIo {
-    fn read(&mut self) -> i64;
-
-    fn write(&mut self, value: i64);
-}
+type MachineMemoryType = i64;
 
 #[derive(Debug)]
-pub struct Machine<'a, I: StdIo> {
-    state: Vec<i64>,
-    io: &'a mut I,
+pub struct Machine {
+    state: Vec<MachineMemoryType>,
     relative_base: i64,
+    input: Receiver<MachineMemoryType>,
+    output: Sender<MachineMemoryType>,
 }
 
-impl<'a, I: StdIo> Machine<'a, I> {
-    pub fn new(mut input: Vec<i64>, io: &'a mut I) -> Self {
-        input.append(&mut vec![0; MEMORY_SIZE - input.len()]);
+impl Machine {
+
+    pub fn new(mut program: Vec<MachineMemoryType>, input: Receiver<MachineMemoryType>, output: Sender<MachineMemoryType>) -> Self {
+        program.append(&mut vec![0; MEMORY_SIZE - program.len()]);
         Machine {
-            state: input,
-            io,
+            state: program,
             relative_base: 0,
+            input,
+            output,
         }
     }
 
-    fn _generate_operation_vec(&self, instruction: i64) -> Option<(i64, usize, usize, usize)> {
-        let mut instruc_str: String = instruction.to_string();
-        if instruc_str.len() < INSTRUCTION_LENGTH {
-            instruc_str = format!("{}{}", String::from_utf8(
-                vec![b'0'; INSTRUCTION_LENGTH - instruc_str.len()]).expect("failed to create padding string"), instruc_str);
-        }
-        let read_mode_3: usize = usize::try_from(instruc_str.remove(0).to_digit(10)?).ok()?;
-        let read_mode_2: usize = usize::try_from(instruc_str.remove(0).to_digit(10)?).ok()?;
-        let read_mode_1: usize = usize::try_from(instruc_str.remove(0).to_digit(10)?).ok()?;
-        let opcode = instruc_str.parse().ok()?;
-
-        Some((opcode, read_mode_1, read_mode_2, read_mode_3))
+    fn _generate_operation_vec(&self, instruction: MachineMemoryType) -> Option<(MachineMemoryType, usize, usize, usize)> {
+        let opcode = instruction % 100;
+        let read_mode_1 = (instruction / 100) % 10;
+        let read_mode_2 = (instruction / 1000) % 10;
+        let read_mode_3 = (instruction / 10000) % 10;
+        Some((opcode, read_mode_1 as usize, read_mode_2 as usize, read_mode_3 as usize))
     }
 
-    fn _create_addressing_mode(mode: usize, value: i64) -> AddressingMode {
+    fn _create_addressing_mode(mode: usize, value: MachineMemoryType) -> AddressingMode {
         match mode {
             0 => AddressingMode::Register(value as usize),
             1 => AddressingMode::Immediate(value),
@@ -71,7 +65,7 @@ impl<'a, I: StdIo> Machine<'a, I> {
         }
     }
 
-    fn _parse_slice(&self, slice: &[i64]) -> Option<(Command, usize)> {
+    fn _parse_slice(&self, slice: &[MachineMemoryType]) -> Option<(Command, usize)> {
         let op_vec = self._generate_operation_vec(slice[0])?;
         match op_vec.0 {
             1 => Some((Command::Add(
@@ -119,7 +113,7 @@ impl<'a, I: StdIo> Machine<'a, I> {
         }
     }
 
-    fn _read_memory(&self, addressing_mode: AddressingMode)-> i64 {
+    fn _read_memory(&self, addressing_mode: AddressingMode)-> MachineMemoryType {
         match addressing_mode {
             AddressingMode::Register(pos) => self.state[pos],
             AddressingMode::Immediate(value) => value,
@@ -130,7 +124,7 @@ impl<'a, I: StdIo> Machine<'a, I> {
         }
     }
 
-    fn _write_memory(&mut self, addressing_mode: AddressingMode, value: i64) {
+    fn _write_memory(&mut self, addressing_mode: AddressingMode, value: MachineMemoryType) {
         match addressing_mode {
             AddressingMode::Register(pos) => self.state[pos] = value,
             AddressingMode::Immediate(_) => panic!("can't write value."),
@@ -140,27 +134,38 @@ impl<'a, I: StdIo> Machine<'a, I> {
 
     fn _read_input(&mut self, addressing_mode: AddressingMode) {
         println!("read: {:?} {}", addressing_mode, self.relative_base);
-        let input: i64 = self.io.read();
-        self._write_memory(addressing_mode, input);
+        match self.input.recv() {
+            Ok(input) => {
+                println!("read value {}", input);
+                self._write_memory(addressing_mode, input);
+            }
+            Err(_) => panic!("input closed before machine finished"),
+        }
     }
 
     fn _write_output(&mut self, addressing_mode: AddressingMode) {
         println!("write: {:?} {}", addressing_mode, self.relative_base);
-        self.io.write(self._read_memory(addressing_mode));
+        match self.output.send(self._read_memory(addressing_mode)) {
+            Ok(()) => {},
+            Err(e) => panic!(format!("failed to send data: {}", e)),
+        }
     }
 
-    fn _two_arg_test(&self, arg1_mode: AddressingMode, arg2_mode: AddressingMode, test: impl Fn(i64, i64) -> bool) -> bool {
+    fn _two_arg_test(&self, arg1_mode: AddressingMode, arg2_mode: AddressingMode, test: impl Fn(MachineMemoryType, MachineMemoryType) -> bool) -> bool {
         let arg1 = self._read_memory(arg1_mode);
         let arg2 = self._read_memory(arg2_mode);
         test(arg1, arg2)
     }
 
-    fn _run_machine(&mut self) {
+    pub fn execute(&mut self) {
         let mut program_counter = 0;
         let mut parsed_command = self._parse_slice(&self.state[program_counter .. program_counter+4]);
         while let Some(command) = parsed_command {
             match command.0 {
-                Command::End() => return,
+                Command::End() => {
+                    println!("machine halt");
+                    return;
+                },
                 Command::Add(v1, v2, res) => {
                     self._write_memory(res, self._read_memory(v1) + self._read_memory(v2));
                     program_counter += command.1;
@@ -210,11 +215,115 @@ impl<'a, I: StdIo> Machine<'a, I> {
         }
     }
 
-    pub fn execute(&mut self) {
-        self._run_machine();
-    }
-
     pub fn read_memory(&self) -> &Vec<i64> {
         &self.state
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::io::{self};
+
+    fn read_file(path: &str) -> io::Result<Vec<i64>> {
+        Ok(fs::read_to_string(path)?.split(',')
+            .map(|x| x.parse::<i64>().unwrap())
+            .collect())
+    }
+
+    #[test]
+    fn day2_example_1() {
+        let (_, input_rx) = mpsc::channel();
+        let (output_tx, _) = mpsc::channel();
+        let mut machine = Machine::new(vec![1,0,0,0,99], input_rx, output_tx);
+        machine.execute();
+        assert_eq!(machine.read_memory()[0], 2);
+    }
+
+    #[test]
+    fn day2_part1() {
+        let (_, input_rx) = mpsc::channel();
+        let (output_tx, _) = mpsc::channel();
+        let mut machine = Machine::new(vec![1,12,2,3,1,1,2,3,1,3,4,3,1,5,0,3,2,6,1,19,1,5,19,23,2,9,23,27,1,6,27,31,1,31,9,35,2,35,10,39,1,5,39,43,2,43,9,47,1,5,47,51,1,51,5,55,1,55,9,59,2,59,13,63,1,63,9,67,1,9,67,71,2,71,10,75,1,75,6,79,2,10,79,83,1,5,83,87,2,87,10,91,1,91,5,95,1,6,95,99,2,99,13,103,1,103,6,107,1,107,5,111,2,6,111,115,1,115,13,119,1,119,2,123,1,5,123,0,99,2,0,14,0], input_rx, output_tx);
+        machine.execute();
+        assert_eq!(machine.read_memory()[0], 3101844);
+    }
+
+    #[test]
+    fn day5_example1() {
+        let (_, input_rx) = mpsc::channel();
+        let (output_tx, _) = mpsc::channel();
+        let mut machine = Machine::new(vec![1002,4,3,4,33], input_rx, output_tx);
+        machine.execute();
+        assert_eq!(machine.read_memory()[4], 99);
+    }
+
+
+    #[test]
+    fn day5_example_1() {
+        for (input, output) in vec![(1, 1), (0, 0)] {
+            let (input_tx, input_rx) = mpsc::channel();
+            let (output_tx, output_rx) = mpsc::channel();
+            input_tx.send(input).expect("failed to send data");
+            let mut machine = Machine::new(vec![3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9], input_rx, output_tx);
+            machine.execute();
+            assert_eq!(output_rx.recv().expect("failed to read output"), output);
+        }
+    }
+
+    #[test]
+    fn day5_example_2() {
+        for (input, output) in vec![(7, 999), (8, 1000), (9, 1001)] {
+            let (input_tx, input_rx) = mpsc::channel();
+            let (output_tx, output_rx) = mpsc::channel();
+            input_tx.send(input).expect("failed to send data");
+            let mut machine = Machine::new(vec![3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99], input_rx, output_tx);
+            machine.execute();
+            assert_eq!(output_rx.recv().expect("failed to read output"), output);
+        }
+    }
+
+    #[test]
+    fn day5_part2() {
+        let (input_tx, input_rx) = mpsc::channel();
+        let (output_tx, output_rx) = mpsc::channel();
+        input_tx.send(5).expect("failed to send data");
+        let program = read_file("/home/tim/projects/AoC19/resources/day5input").expect("failed to read day 5 in");
+        let mut machine = Machine::new(program, input_rx, output_tx);
+        machine.execute();
+        assert_eq!(output_rx.recv().expect("failed to read output"), 773660);
+    }
+
+    #[test]
+    fn day9_example1() {
+        let (input_tx, input_rx) = mpsc::channel();
+        let (output_tx, output_rx) = mpsc::channel();
+        input_tx.send(5).expect("failed to send data");
+        let program = vec![109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99];
+        let mut machine = Machine::new(program.clone(), input_rx, output_tx);
+        machine.execute();
+        let output: Vec<MachineMemoryType> = output_rx.try_iter().collect();
+        assert_eq!(program, output);
+    }
+
+    #[test]
+    fn day9_example2() {
+        let (input_tx, input_rx) = mpsc::channel();
+        let (output_tx, output_rx) = mpsc::channel();
+        input_tx.send(5).expect("failed to send data");
+        let mut machine = Machine::new(vec![1102,34915192,34915192,7,4,7,99,0], input_rx, output_tx);
+        machine.execute();
+        assert_eq!(format!("{}", output_rx.recv().expect("failed to read output")).len(), 16);
+    }
+
+    #[test]
+    fn day9_example3() {
+        let (input_tx, input_rx) = mpsc::channel();
+        let (output_tx, output_rx) = mpsc::channel();
+        input_tx.send(5).expect("failed to send data");
+        let mut machine = Machine::new(vec![104,1125899906842624,99], input_rx, output_tx);
+        machine.execute();
+        assert_eq!(output_rx.recv().expect("failed to read output"), 1125899906842624);
     }
 }

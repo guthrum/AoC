@@ -1,53 +1,6 @@
-use lib::int_code::{read_file, machine::Machine, machine};
+use lib::int_code::{read_file, machine::Machine};
+use std::sync::mpsc;
 use lib::permutation;
-
-enum Phase {
-    Ready,
-    ReadSetting,
-    ReadInput,
-}
-
-struct AmpIo {
-    phase_setting: i64,
-    input_sgnal: i64,
-    phase: Phase,
-    outputs: Vec<i64>,
-}
-
-impl AmpIo {
-    fn new(phase_setting: i64, amp_input: i64) -> Self {
-        AmpIo {
-            phase_setting,
-            input_sgnal: amp_input,
-            phase: Phase::Ready,
-            outputs: Vec::new(),
-        }
-    }
-
-    fn get_outputs(&self) -> &Vec<i64> {
-        &self.outputs
-    }
-}
-
-impl machine::StdIo for AmpIo {
-    fn read(&mut self) -> i64 {
-        match self.phase {
-            Phase::Ready => {
-                self.phase = Phase::ReadSetting;
-                self.phase_setting
-            },
-            Phase::ReadSetting => {
-                self.phase = Phase::ReadInput;
-                self.input_sgnal
-            },
-            _ => panic!("invalid state for reading.")
-        }
-    }
-
-    fn write(&mut self, value: i64) {
-        self.outputs.push(value);
-    }
-}
 
 struct AmpController {
     program: Vec<i64>,
@@ -65,10 +18,13 @@ impl AmpController {
 
         for i in 0..5 {
             let phase = sequence.get(i).expect("no phase found");
-            let mut amp_io = AmpIo::new(phase.clone(), last_output);
-            let mut amp = Machine::new(self.program.clone(), &mut amp_io);
-            amp.execute();
-            last_output = amp_io.get_outputs().get(0).expect("no machine output").clone();
+            let (input_tx, input_rx) = mpsc::channel();
+            let (output_tx, output_rx) = mpsc::channel();
+            input_tx.send(*phase).expect("failed to send data");
+            input_tx.send(last_output.clone()).expect("failed to send data");
+            let mut machine = Machine::new(self.program.clone(), input_rx, output_tx);
+            machine.execute();
+            last_output = output_rx.recv().expect("failed to receive");
         }
         last_output
     }

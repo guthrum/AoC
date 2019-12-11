@@ -121,7 +121,6 @@ impl Station {
 }
 
 
-
 fn main() {
     let input = read_input("/home/tim/projects/AoC19/resources/day10input").expect("failed to load input");
     println!("{:?}", find_optimal_point(&input));
