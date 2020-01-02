@@ -1,9 +1,8 @@
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
-use std::collections::{HashSet, HashMap};
-use std::hash::{Hash, Hasher};
-
 
 #[derive(Clone, Copy, Eq)]
 struct Point {
@@ -37,13 +36,12 @@ impl Hash for Point {
     }
 }
 
-
 #[derive(Debug, Clone, Copy)]
 enum LineType {
     UP,
     DOWN,
     LEFT,
-    RIGHT
+    RIGHT,
 }
 
 impl LineType {
@@ -78,7 +76,7 @@ struct Line {
     line_type: LineType,
     length: i32,
     current_point: Point,
-    step_count: i32
+    step_count: i32,
 }
 
 impl Line {
@@ -92,9 +90,10 @@ impl Line {
         };
         let length = value.parse().expect("unable to parse line length");
         Line {
-            line_type, length,
+            line_type,
+            length,
             current_point: point,
-            step_count: point.step
+            step_count: point.step,
         }
     }
 }
@@ -108,7 +107,9 @@ impl Iterator for Line {
         } else {
             self.length -= 1;
             self.step_count += 1;
-            self.current_point = self.line_type.next_point(&self.current_point, self.step_count);
+            self.current_point = self
+                .line_type
+                .next_point(&self.current_point, self.step_count);
             Some(Point {
                 x: self.current_point.x,
                 y: self.current_point.y,
@@ -127,10 +128,21 @@ struct Path {
 
 impl Path {
     pub fn new(mut path: Vec<String>) -> Self {
-        let current_line = Line::new(path.remove(0), Point { x: 0, y: 0, step: 0});
+        let current_line = Line::new(
+            path.remove(0),
+            Point {
+                x: 0,
+                y: 0,
+                step: 0,
+            },
+        );
         Path {
             path,
-            last_point: Point { x: 0, y: 0, step: 0},
+            last_point: Point {
+                x: 0,
+                y: 0,
+                step: 0,
+            },
             current_line,
         }
     }
@@ -139,15 +151,15 @@ impl Path {
 impl Iterator for Path {
     type Item = Point; // output points
 
-    fn next(&mut self) -> Option<Self::Item> {        
+    fn next(&mut self) -> Option<Self::Item> {
         match self.current_line.next() {
             Some(point) => {
                 self.last_point = point;
                 Some(point)
-            },
+            }
             None => {
                 if self.path.is_empty() {
-                    return None
+                    return None;
                 }
                 self.current_line = Line::new(self.path.remove(0), self.last_point);
                 self.current_line.next()
@@ -160,8 +172,18 @@ fn read_file(path: &str) -> std::io::Result<(Vec<String>, Vec<String>)> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let mut lines_iter = reader.lines().map(|l| l.unwrap());
-    let path1 = lines_iter.next().unwrap().split(',').map(|x| x.to_owned()).collect();
-    let path2 = lines_iter.next().unwrap().split(',').map(|x| x.to_owned()).collect();
+    let path1 = lines_iter
+        .next()
+        .unwrap()
+        .split(',')
+        .map(|x| x.to_owned())
+        .collect();
+    let path2 = lines_iter
+        .next()
+        .unwrap()
+        .split(',')
+        .map(|x| x.to_owned())
+        .collect();
     Ok((path1, path2))
 }
 
@@ -178,23 +200,29 @@ fn get_set(points: Vec<Point>) -> HashSet<Point> {
 fn solve(path1: Vec<Point>, path2: Vec<Point>) -> i32 {
     let p1_point_set: HashSet<Point> = get_set(path1);
     let p2_point_set: HashSet<Point> = get_set(path2);
-    let origin = Point { x: 0, y: 0, step: 0};
+    let origin = Point {
+        x: 0,
+        y: 0,
+        step: 0,
+    };
 
-    let reduced_points1: HashMap<(i32, i32), i32> = p1_point_set.iter()
+    let reduced_points1: HashMap<(i32, i32), i32> = p1_point_set
+        .iter()
         .filter(|x| p2_point_set.contains(x))
         .map(|x| ((x.x, x.y), x.step))
         .collect();
 
-    p2_point_set.iter()
+    p2_point_set
+        .iter()
         .filter(|x| reduced_points1.contains_key(&(x.x, x.y)))
         .map(|x| reduced_points1.get(&(x.x, x.y)).expect("issue") + x.step)
         .min()
         .unwrap_or(-1)
 }
 
-
 fn main() {
-    let paths = read_file("/home/tim/projects/AoC19/resources/day3input").expect("failed to load input");
+    let paths =
+        read_file("/home/tim/projects/AoC19/resources/day3input").expect("failed to load input");
     let path1: Vec<Point> = Path::new(paths.0).into_iter().collect();
     let path2: Vec<Point> = Path::new(paths.1).into_iter().collect();
     println!("{}", solve(path1, path2));

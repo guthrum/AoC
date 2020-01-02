@@ -1,7 +1,7 @@
-use std::sync::mpsc::{self, Sender, Receiver};
-use lib::int_code::{read_file, machine::Machine, machine};
-use std::thread;
+use lib::int_code::{machine, machine::Machine, read_file};
 use std::collections::HashMap;
+use std::sync::mpsc::{self, Receiver, Sender};
+use std::thread;
 
 #[derive(Copy, Clone, Debug)]
 enum Colour {
@@ -34,7 +34,7 @@ impl Heading {
 
     fn change_y(&self) -> i32 {
         match *self {
-            Self::North=> 1,
+            Self::North => 1,
             Self::South => -1,
             _ => 0,
         }
@@ -60,10 +60,9 @@ struct Coordinate {
     y: i32,
 }
 
-
 #[derive(Debug)]
 struct Canvas {
-    canvas: HashMap<Coordinate, Colour>
+    canvas: HashMap<Coordinate, Colour>,
 }
 
 impl Canvas {
@@ -84,7 +83,11 @@ impl Canvas {
     pub fn print(&self) {
         for y in (-10..10).rev() {
             for x in -40..40 {
-                let chr = match self.canvas.get(&Coordinate{ x, y}).unwrap_or(&Colour::Black) {
+                let chr = match self
+                    .canvas
+                    .get(&Coordinate { x, y })
+                    .unwrap_or(&Colour::Black)
+                {
                     Colour::Black => " ",
                     Colour::White => "X",
                 };
@@ -97,7 +100,7 @@ impl Canvas {
 
 fn solve(program: Vec<i64>, starting_colour: Colour) -> Canvas {
     let mut canvas = Canvas::new();
-    let mut position = Coordinate {x: 0, y: 0};
+    let mut position = Coordinate { x: 0, y: 0 };
     let mut heading = Heading::North;
     canvas.paint(position.clone(), starting_colour);
 
@@ -123,7 +126,7 @@ fn solve(program: Vec<i64>, starting_colour: Colour) -> Canvas {
             Ok(_) => panic!("unknown response for colour to paint"),
             Err(e) => {
                 eprintln!("failed to get colour {}", e);
-                break
+                break;
             }
         };
         canvas.paint(position.clone(), colour_to_paint);
@@ -133,7 +136,7 @@ fn solve(program: Vec<i64>, starting_colour: Colour) -> Canvas {
             Ok(_) => panic!("unknown response for direction"),
             Err(e) => {
                 eprintln!("failed to get direction {}", e);
-                break
+                break;
             }
         };
         heading = heading.turn(direction);
@@ -144,7 +147,11 @@ fn solve(program: Vec<i64>, starting_colour: Colour) -> Canvas {
 }
 
 fn main() {
-    let input = read_file("/home/tim/projects/AoC19/resources/day11input").expect("failed to read input");
-    println!("part1 outputs = {:?}", solve(input.clone(), Colour::Black).canvas.len());
+    let input =
+        read_file("/home/tim/projects/AoC19/resources/day11input").expect("failed to read input");
+    println!(
+        "part1 outputs = {:?}",
+        solve(input.clone(), Colour::Black).canvas.len()
+    );
     solve(input.clone(), Colour::White).print();
 }

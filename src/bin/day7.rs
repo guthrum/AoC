@@ -1,6 +1,6 @@
-use lib::int_code::{read_file, machine::Machine};
-use std::sync::mpsc;
+use lib::int_code::{machine::Machine, read_file};
 use lib::permutation;
+use std::sync::mpsc;
 
 struct AmpController {
     program: Vec<i64>,
@@ -8,9 +8,7 @@ struct AmpController {
 
 impl AmpController {
     fn new(program: Vec<i64>) -> Self {
-        AmpController {
-            program,
-        }
+        AmpController { program }
     }
 
     fn execute_seq(&self, sequence: &Vec<i64>, intial_input: i64) -> i64 {
@@ -21,7 +19,9 @@ impl AmpController {
             let (input_tx, input_rx) = mpsc::channel();
             let (output_tx, output_rx) = mpsc::channel();
             input_tx.send(*phase).expect("failed to send data");
-            input_tx.send(last_output.clone()).expect("failed to send data");
+            input_tx
+                .send(last_output.clone())
+                .expect("failed to send data");
             let mut machine = Machine::new(self.program.clone(), input_rx, output_tx);
             machine.execute();
             last_output = output_rx.recv().expect("failed to receive");
@@ -58,13 +58,11 @@ impl AmpController {
 
         (phases, score)
     }
-
 }
 
-
 fn main() {
-    let input = read_file("/home/tim/projects/AoC19/resources/day7input").expect("failed to read input");
+    let input =
+        read_file("/home/tim/projects/AoC19/resources/day7input").expect("failed to read input");
     let amp_controller = AmpController::new(input);
     println!("final output = {:?}", amp_controller.optimise_phases_1());
-
 }

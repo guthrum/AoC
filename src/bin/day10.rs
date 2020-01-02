@@ -1,7 +1,7 @@
-use std::io::BufReader;
-use std::io::prelude::*;
+use std::collections::{BTreeMap, HashSet};
 use std::fs::File;
-use std::collections::{HashSet, BTreeMap};
+use std::io::prelude::*;
+use std::io::BufReader;
 use std::iter::FromIterator;
 
 #[derive(Debug, Copy, Clone)]
@@ -11,9 +11,9 @@ struct Point {
 }
 
 fn calculate_hash_of_angle_from_north(from: &Point, to: &Point) -> i64 {
-    let dy = (-1*(to.y - from.y)) as f64;
+    let dy = (-1 * (to.y - from.y)) as f64;
     let dx = (to.x - from.x) as f64;
-    let atan = (dx/dy).atan().to_degrees();
+    let atan = (dx / dy).atan().to_degrees();
     let v = (if (0.0 <= dx) && (0.0 <= dy) {
         atan
     } else if (dx < 0.0) && (0.0 <= dy) {
@@ -22,18 +22,22 @@ fn calculate_hash_of_angle_from_north(from: &Point, to: &Point) -> i64 {
         180.0 + atan
     } else {
         180.0 + atan
-    } * 1024.0 * 1024.0) as i64;
+    } * 1024.0
+        * 1024.0) as i64;
     v
 }
 
 fn calculate_euclidean_distance(from: &Point, to: &Point) -> f64 {
-    (((from.x-to.x) as f64).powi(2) + ((from.y-to.y) as f64).powi(2)).sqrt()
+    (((from.x - to.x) as f64).powi(2) + ((from.y - to.y) as f64).powi(2)).sqrt()
 }
 
 fn calculate_visible_asteroids(point: &Point, points: &Vec<Point>) -> usize {
-    let visible_angles: HashSet<i64> = HashSet::from_iter(points.iter()
-        .filter(|p| !(p.x == point.x && p.y == point.y))
-        .map(|x| calculate_hash_of_angle_from_north(&point, x)));
+    let visible_angles: HashSet<i64> = HashSet::from_iter(
+        points
+            .iter()
+            .filter(|p| !(p.x == point.x && p.y == point.y))
+            .map(|x| calculate_hash_of_angle_from_north(&point, x)),
+    );
     visible_angles.len()
 }
 
@@ -57,8 +61,11 @@ fn read_input(path: &str) -> Option<Vec<Point>> {
     for (y, line) in reader.lines().enumerate() {
         for (x, cell) in line.ok()?.chars().enumerate() {
             match cell {
-                '.' => {},
-                '#' => {points.push(Point{ x: x as i32, y: y as i32})},
+                '.' => {}
+                '#' => points.push(Point {
+                    x: x as i32,
+                    y: y as i32,
+                }),
                 _ => panic!("unknown input type"),
             }
         }
@@ -66,11 +73,10 @@ fn read_input(path: &str) -> Option<Vec<Point>> {
     Some(points)
 }
 
-
 fn insert_in_sorted_vec(vec: &mut Vec<(f64, Point)>, p: (f64, Point)) {
     for i in 0..vec.len() {
         if p.0 > vec[i].0 {
-            vec.insert(i, p); 
+            vec.insert(i, p);
             return;
         }
     }
@@ -85,7 +91,10 @@ struct Station {
 impl Station {
     fn position_at_optimal_place(mut points: Vec<Point>) -> Self {
         let best_station = find_optimal_point(&points).0.clone();
-        let pos = points.iter().position(|p| p.x == best_station.x && p.y == best_station.y).unwrap();
+        let pos = points
+            .iter()
+            .position(|p| p.x == best_station.x && p.y == best_station.y)
+            .unwrap();
         points.remove(pos);
         Station {
             asteroids: points,
@@ -99,7 +108,9 @@ impl Station {
         for p in &self.asteroids {
             let angle = calculate_hash_of_angle_from_north(&self.position, p);
             let distance_from_station = calculate_euclidean_distance(&self.position, p);
-            let vec = angle_to_list_of_asteroids.entry(angle).or_insert_with(Vec::new);
+            let vec = angle_to_list_of_asteroids
+                .entry(angle)
+                .or_insert_with(Vec::new);
             // println!("{:?} {} {}", p, angle, distance_from_station);
             insert_in_sorted_vec(vec, (distance_from_station, p.clone()));
         }
@@ -120,12 +131,12 @@ impl Station {
     }
 }
 
-
 fn main() {
-    let input = read_input("/home/tim/projects/AoC19/resources/day10input").expect("failed to load input");
+    let input =
+        read_input("/home/tim/projects/AoC19/resources/day10input").expect("failed to load input");
     println!("{:?}", find_optimal_point(&input));
     let station = Station::position_at_optimal_place(input);
     let destroyed = station.solve();
     println!("{:?}", destroyed[199]);
-    println!("{}", destroyed[199].x*100 + destroyed[199].y);
+    println!("{}", destroyed[199].x * 100 + destroyed[199].y);
 }

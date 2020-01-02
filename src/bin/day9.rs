@@ -1,5 +1,5 @@
-use std::sync::mpsc::{self, Sender, Receiver};
-use lib::int_code::{read_file, machine::Machine, machine};
+use lib::int_code::{machine, machine::Machine, read_file};
+use std::sync::mpsc::{self, Receiver, Sender};
 
 fn solve(program: Vec<i64>, input: i64) -> Vec<i64> {
     let (input_tx, input_rx) = mpsc::channel();
@@ -10,9 +10,9 @@ fn solve(program: Vec<i64>, input: i64) -> Vec<i64> {
     output_rx.try_iter().collect()
 }
 
-
 fn main() {
-    let input = read_file("/home/tim/projects/AoC19/resources/day9input").expect("failed to read input");
+    let input =
+        read_file("/home/tim/projects/AoC19/resources/day9input").expect("failed to read input");
     println!("part1 outputs = {:?}", solve(input.clone(), 1));
     println!("part2 outputs = {:?}", solve(input.clone(), 2));
 }
