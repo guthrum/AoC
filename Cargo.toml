@@ -8,7 +8,6 @@ edition = "2018"
 name = "lib"
 path = "src/lib.rs"
 
-
 [[bin]]
 name = "day1"
 path = "src/bin/day1.rs"
@@ -48,6 +47,10 @@ path = "src/bin/day9.rs"
 [[bin]]
 name = "day10"
 path = "src/bin/day10.rs"
+
+[[bin]]
+name = "day11"
+path = "src/bin/day11.rs"
 
 [dependencies]
 itertools = "0.8.2"
