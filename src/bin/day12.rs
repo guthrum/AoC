@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fmt;
 
 fn gcm(a: i64, b: i64) -> i64 {
