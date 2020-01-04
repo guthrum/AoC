@@ -144,7 +144,7 @@ impl Machine {
         let buffer = buffer.trim();
         let input: i32 = buffer
             .parse()
-            .expect(&format!("failed to parse {} to i32.", buffer));
+            .unwrap_or_else(|_| panic!("failed to parse {} to i32.", buffer));
         self.state[pos] = input;
     }
 

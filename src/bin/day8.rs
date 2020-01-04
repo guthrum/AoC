@@ -17,7 +17,7 @@ fn draw_image(img: &Vec<Vec<i32>>) {
                 print!(" ");
             }
         }
-        println!("");
+        println!();
     }
 }
 
@@ -67,9 +67,9 @@ impl ImageDecoder {
 
     fn _get_all_coords(&self) -> Vec<(usize, usize)> {
         let mut v = Vec::new();
-        for h in 0..self.height {
-            for w in 0..self.width {
-                v.push((w.clone() as usize, h.clone() as usize));
+        for h in 0..self.height as usize {
+            for w in 0..self.width as usize {
+                v.push((w, h));
             }
         }
         v
@@ -77,9 +77,9 @@ impl ImageDecoder {
 
     fn _blank_image(&self) -> Vec<Vec<i32>> {
         let mut img = Vec::new();
-        for h in 0..self.height {
+        for _ in 0..self.height {
             let mut line = Vec::new();
-            for w in 0..self.width {
+            for _ in 0..self.width {
                 line.push(0)
             }
             img.push(line);
@@ -95,11 +95,11 @@ impl ImageDecoder {
             // draw_image(&img);
             let mut layers_blank_cells = Vec::new();
             for (x, y) in &blank_cells {
-                let pixel = layer[y.clone()][x.clone()];
+                let pixel = layer[*y][*x];
                 if pixel == 2 {
-                    layers_blank_cells.push((x.clone(), y.clone()));
+                    layers_blank_cells.push((*x, *y));
                 } else {
-                    img[y.clone()][x.clone()] = pixel;
+                    img[*y][*x] = pixel;
                 }
             }
             blank_cells = layers_blank_cells;

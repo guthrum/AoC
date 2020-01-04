@@ -1,8 +1,8 @@
-fn check_same(v1: &u32, v2: &u32) -> bool {
+fn check_same(v1: u32, v2: u32) -> bool {
     v1 == v2
 }
 
-fn v1_less_than_or_equal(v1: &u32, v2: &u32) -> bool {
+fn v1_less_than_or_equal(v1: u32, v2: u32) -> bool {
     v1 <= v2
 }
 
@@ -14,8 +14,8 @@ fn make_checks_p1(password: Vec<u32>) -> bool {
 
     while let Some(value) = iter.next() {
         if let Some(next) = iter.peek() {
-            adjacent = adjacent || check_same(next, &value);
-            non_decreasing = non_decreasing && v1_less_than_or_equal(&value, next);
+            adjacent = adjacent || check_same(**next, *value);
+            non_decreasing = non_decreasing && v1_less_than_or_equal(*value, **next);
         }
         if !non_decreasing {
             return false;
@@ -48,7 +48,7 @@ fn make_checks_p2(password: Vec<u32>) -> bool {
                             }
                         }
                     }
-                    adjacent = adjacent || true;
+                    adjacent = true;
                 }
             }
         }
@@ -67,7 +67,7 @@ fn deserialize_password(int_form: i32) -> Vec<u32> {
 
 fn solve_part1(lower: i32, upper: i32) -> u32 {
     let mut count = 0;
-    for n in lower..upper + 1 {
+    for n in lower..=upper {
         if make_checks_p1(deserialize_password(n)) {
             count += 1;
         }
@@ -77,7 +77,7 @@ fn solve_part1(lower: i32, upper: i32) -> u32 {
 
 fn solve_part2(lower: i32, upper: i32) -> u32 {
     let mut count = 0;
-    for n in lower..upper + 1 {
+    for n in lower..=upper {
         if make_checks_p2(deserialize_password(n)) {
             count += 1;
         }
@@ -86,6 +86,6 @@ fn solve_part2(lower: i32, upper: i32) -> u32 {
 }
 
 fn main() {
-    println!("{}", solve_part1(278384, 824795));
-    println!("{}", solve_part2(278384, 824795));
+    println!("{}", solve_part1(278_384, 824_795));
+    println!("{}", solve_part2(278_384, 824_795));
 }

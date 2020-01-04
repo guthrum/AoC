@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{Receiver, Sender};
 
 static INSTRUCTION_LENGTH: usize = 5;
 static MEMORY_SIZE: usize = 4096;
@@ -285,6 +285,7 @@ mod tests {
     use super::*;
     use std::fs;
     use std::io::{self};
+    use std::sync::mpsc;
 
     fn read_file(path: &str) -> io::Result<Vec<i64>> {
         Ok(fs::read_to_string(path)?

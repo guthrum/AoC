@@ -1,10 +1,10 @@
+use std::cmp::Ordering;
 use std::fmt;
 
 fn gcm(a: i64, b: i64) -> i64 {
-    if b == 0 {
-        a
-    } else {
-        gcm(b, a % b)
+    match b {
+        0 => a,
+        _ => gcm(b, a % b),
     }
 }
 
@@ -64,16 +64,19 @@ impl Moon {
         }
     }
 
+    #[allow(dead_code)]
     fn get_kinetic_energy(&self) -> i64 {
         let velocity = &self.velocity;
         velocity.x.abs() + velocity.y.abs() + velocity.z.abs()
     }
 
+    #[allow(dead_code)]
     fn get_potential_energy(&self) -> i64 {
         let pos = &self.position;
         pos.x.abs() + pos.y.abs() + pos.z.abs()
     }
 
+    #[allow(dead_code)]
     fn get_total_energy(&self) -> i64 {
         self.get_kinetic_energy() * self.get_potential_energy()
     }
@@ -95,12 +98,10 @@ impl System {
     }
 
     fn comp_velocity(vel1: i64, vel2: i64) -> i64 {
-        if vel1 == vel2 {
-            0
-        } else if vel1 < vel2 {
-            1
-        } else {
-            -1
+        match vel1.cmp(&vel2) {
+            Ordering::Equal => 0,
+            Ordering::Less => 1,
+            _ => -1,
         }
     }
 
@@ -126,10 +127,12 @@ impl System {
         }
     }
 
+    #[allow(dead_code)]
     fn system_energy(&self) -> i64 {
         self.moons.iter().map(|x| x.get_total_energy()).sum()
     }
 
+    #[allow(dead_code)]
     fn print(&self) {
         for moon in &self.moons {
             println!("{}", moon);

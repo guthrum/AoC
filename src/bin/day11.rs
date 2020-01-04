@@ -1,6 +1,6 @@
-use lib::int_code::{machine, machine::Machine, read_file};
+use lib::int_code::{machine::Machine, read_file};
 use std::collections::HashMap;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc;
 use std::thread;
 
 #[derive(Copy, Clone, Debug)]
@@ -93,7 +93,7 @@ impl Canvas {
                 };
                 print!("{}", chr);
             }
-            println!("");
+            println!();
         }
     }
 }
@@ -109,7 +109,7 @@ fn solve(program: Vec<i64>, starting_colour: Colour) -> Canvas {
     let mut machine = Machine::new(program, input_rx, output_tx);
 
     thread::spawn(move || {
-        machine.execute();
+        machine.execute().expect("failed to excute machine");
     });
 
     loop {
@@ -153,5 +153,5 @@ fn main() {
         "part1 outputs = {:?}",
         solve(input.clone(), Colour::Black).canvas.len()
     );
-    solve(input.clone(), Colour::White).print();
+    solve(input, Colour::White).print();
 }

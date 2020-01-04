@@ -11,27 +11,24 @@ struct Point {
 }
 
 fn calculate_hash_of_angle_from_north(from: &Point, to: &Point) -> i64 {
-    let dy = (-1 * (to.y - from.y)) as f64;
+    let dy = (to.y - from.y).wrapping_neg() as f64;
     let dx = (to.x - from.x) as f64;
     let atan = (dx / dy).atan().to_degrees();
-    let v = (if (0.0 <= dx) && (0.0 <= dy) {
+    (if (0.0 <= dx) && (0.0 <= dy) {
         atan
     } else if (dx < 0.0) && (0.0 <= dy) {
         360.0 + atan
-    } else if (dx < 0.0) && (dy < 0.0) {
-        180.0 + atan
     } else {
         180.0 + atan
     } * 1024.0
-        * 1024.0) as i64;
-    v
+        * 1024.0) as i64
 }
 
 fn calculate_euclidean_distance(from: &Point, to: &Point) -> f64 {
     (((from.x - to.x) as f64).powi(2) + ((from.y - to.y) as f64).powi(2)).sqrt()
 }
 
-fn calculate_visible_asteroids(point: &Point, points: &Vec<Point>) -> usize {
+fn calculate_visible_asteroids(point: &Point, points: &[Point]) -> usize {
     let visible_angles: HashSet<i64> = HashSet::from_iter(
         points
             .iter()
@@ -41,7 +38,7 @@ fn calculate_visible_asteroids(point: &Point, points: &Vec<Point>) -> usize {
     visible_angles.len()
 }
 
-fn find_optimal_point(points: &Vec<Point>) -> (&Point, usize) {
+fn find_optimal_point(points: &[Point]) -> (&Point, usize) {
     let mut point = &points[0];
     let mut count = 0;
     for p in points {
@@ -90,7 +87,7 @@ struct Station {
 
 impl Station {
     fn position_at_optimal_place(mut points: Vec<Point>) -> Self {
-        let best_station = find_optimal_point(&points).0.clone();
+        let best_station = *find_optimal_point(&points).0;
         let pos = points
             .iter()
             .position(|p| p.x == best_station.x && p.y == best_station.y)
@@ -112,7 +109,7 @@ impl Station {
                 .entry(angle)
                 .or_insert_with(Vec::new);
             // println!("{:?} {} {}", p, angle, distance_from_station);
-            insert_in_sorted_vec(vec, (distance_from_station, p.clone()));
+            insert_in_sorted_vec(vec, (distance_from_station, *p));
         }
 
         let mut destroyed_order = Vec::new();
@@ -120,7 +117,7 @@ impl Station {
         while !complete {
             complete = true;
             for (_, value) in angle_to_list_of_asteroids.iter_mut() {
-                if value.len() > 0 {
+                if !value.is_empty() {
                     let next = value.pop().unwrap().1;
                     destroyed_order.push(next);
                     complete = false;

@@ -46,7 +46,6 @@ fn execute(mut input: Vec<usize>, noun: usize, verb: usize) -> usize {
 }
 
 fn main() {
-    // let numbers = ;
     let mut noun = 0;
     let mut verb = 0;
     while execute(

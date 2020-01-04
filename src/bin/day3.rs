@@ -18,6 +18,7 @@ impl std::fmt::Debug for Point {
 }
 
 impl Point {
+    #[allow(dead_code)]
     fn manhattan_distance_to(&self, p: &Point) -> i32 {
         (self.x - p.x).abs() + (self.y - p.y).abs()
     }
@@ -200,11 +201,6 @@ fn get_set(points: Vec<Point>) -> HashSet<Point> {
 fn solve(path1: Vec<Point>, path2: Vec<Point>) -> i32 {
     let p1_point_set: HashSet<Point> = get_set(path1);
     let p2_point_set: HashSet<Point> = get_set(path2);
-    let origin = Point {
-        x: 0,
-        y: 0,
-        step: 0,
-    };
 
     let reduced_points1: HashMap<(i32, i32), i32> = p1_point_set
         .iter()
@@ -223,7 +219,7 @@ fn solve(path1: Vec<Point>, path2: Vec<Point>) -> i32 {
 fn main() {
     let paths =
         read_file("/home/tim/projects/AoC19/resources/day3input").expect("failed to load input");
-    let path1: Vec<Point> = Path::new(paths.0).into_iter().collect();
-    let path2: Vec<Point> = Path::new(paths.1).into_iter().collect();
+    let path1: Vec<Point> = Path::new(paths.0).collect();
+    let path2: Vec<Point> = Path::new(paths.1).collect();
     println!("{}", solve(path1, path2));
 }
