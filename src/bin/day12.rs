@@ -1,4 +1,17 @@
+use std::collections::HashMap;
 use std::fmt;
+
+fn gcm(a: i64, b: i64) -> i64 {
+    if b == 0 {
+        a
+    } else {
+        gcm(b, a % b)
+    }
+}
+
+fn lcm(a: i64, b: i64) -> i64 {
+    (a.abs() * b.abs()) / gcm(a, b)
+}
 
 #[derive(Copy, Clone, Debug)]
 struct Coordinate {
@@ -78,6 +91,10 @@ struct System {
 }
 
 impl System {
+    fn new(moons: Vec<Moon>) -> Self {
+        System { moons }
+    }
+
     fn comp_velocity(vel1: i64, vel2: i64) -> i64 {
         if vel1 == vel2 {
             0
@@ -119,6 +136,67 @@ impl System {
             println!("{}", moon);
         }
     }
+
+    fn solve_part2(&mut self) -> i64 {
+        let mut periods = (None, None, None);
+        let start_x: Vec<(i64, i64)> = self
+            .moons
+            .iter()
+            .map(|m| (m.position.x, m.velocity.x))
+            .collect();
+        let start_y: Vec<(i64, i64)> = self
+            .moons
+            .iter()
+            .map(|m| (m.position.y, m.velocity.y))
+            .collect();
+        let start_z: Vec<(i64, i64)> = self
+            .moons
+            .iter()
+            .map(|m| (m.position.z, m.velocity.z))
+            .collect();
+        let mut step = 0;
+
+        while periods.0.is_none() || periods.1.is_none() || periods.2.is_none() {
+            self.simulate(1);
+            step += 1;
+            if periods.0.is_none() {
+                let x_state: Vec<(i64, i64)> = self
+                    .moons
+                    .iter()
+                    .map(|m| (m.position.x, m.velocity.x))
+                    .collect();
+                if x_state == start_x {
+                    periods.0 = Some(step);
+                }
+            }
+
+            if periods.1.is_none() {
+                let y_state: Vec<(i64, i64)> = self
+                    .moons
+                    .iter()
+                    .map(|m| (m.position.y, m.velocity.y))
+                    .collect();
+                if y_state == start_y {
+                    periods.1 = Some(step);
+                }
+            }
+
+            if periods.2.is_none() {
+                let z_state: Vec<(i64, i64)> = self
+                    .moons
+                    .iter()
+                    .map(|m| (m.position.z, m.velocity.z))
+                    .collect();
+                if z_state == start_z {
+                    periods.2 = Some(step);
+                }
+            }
+        }
+        lcm(
+            periods.0.unwrap(),
+            lcm(periods.1.unwrap(), periods.2.unwrap()),
+        )
+    }
 }
 
 fn main() {
@@ -128,8 +206,42 @@ fn main() {
         Moon::new(Coordinate::new(-8, -1, 13)),
         Moon::new(Coordinate::new(5, 10, 4)),
     ];
-    let mut system = System { moons };
-    system.simulate(1000);
-    system.print();
-    println!("system total energy = {}", system.system_energy());
+    let mut system = System::new(moons);
+    println!("Part 2 = {}", system.solve_part2());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn part1() {
+        let moons = vec![
+            Moon::new(Coordinate::new(3, 2, -6)),
+            Moon::new(Coordinate::new(-13, 18, 10)),
+            Moon::new(Coordinate::new(-8, -1, 13)),
+            Moon::new(Coordinate::new(5, 10, 4)),
+        ];
+        let mut system = System::new(moons);
+        system.simulate(1000);
+        assert_eq!(system.system_energy(), 14780);
+    }
+
+    #[test]
+    fn part2_example1() {
+        let moons = vec![
+            Moon::new(Coordinate::new(-1, 0, 2)),
+            Moon::new(Coordinate::new(2, -10, -7)),
+            Moon::new(Coordinate::new(4, -8, 8)),
+            Moon::new(Coordinate::new(3, 5, -1)),
+        ];
+        let mut system = System::new(moons);
+        assert_eq!(system.solve_part2(), 2772);
+    }
+
+    #[test]
+    fn test_lcm() {
+        assert_eq!(lcm(1, 2), 2);
+        assert_eq!(lcm(21, 6), 42);
+    }
 }
