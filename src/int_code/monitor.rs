@@ -1,8 +1,8 @@
 use std::convert::TryFrom;
-use std::sync::mpsc::Receiver;
 use std::io::{stdout, Write};
-use termion::{color, cursor};
+use std::sync::mpsc::Receiver;
 use termion::raw::IntoRawMode;
+use termion::{color, cursor};
 
 #[derive(Copy, Clone, Debug)]
 struct Point {
@@ -45,7 +45,13 @@ impl Instruction {
         match (f, s, DisplayObject::try_from(arg)) {
             (-1, 0, _) => Some(Instruction::Score(arg)),
             // we add one as termion is 1,1 based not from 0,0 as the monitor is.
-            (x, y, Ok(obj)) => Some(Instruction::Display(Point { x: (x+1) as u16, y: (y+1) as u16 }, obj)),
+            (x, y, Ok(obj)) => Some(Instruction::Display(
+                Point {
+                    x: (x + 1) as u16,
+                    y: (y + 1) as u16,
+                },
+                obj,
+            )),
             _ => None,
         }
     }
@@ -61,8 +67,17 @@ impl Monitor {
     }
 
     pub fn start(&self) {
-        let mut stdout = stdout().into_raw_mode().expect("failed to get raw terminal");
-        write!(stdout, "{}{}{}", termion::clear::All, cursor::Goto(1, 1), termion::cursor::Hide).unwrap();
+        let mut stdout = stdout()
+            .into_raw_mode()
+            .expect("failed to get raw terminal");
+        write!(
+            stdout,
+            "{}{}{}",
+            termion::clear::All,
+            cursor::Goto(1, 1),
+            termion::cursor::Hide
+        )
+        .unwrap();
         loop {
             let instruction = match (self.input.recv(), self.input.recv(), self.input.recv()) {
                 (Ok(x), Ok(y), Ok(z)) => match Instruction::new(x, y, z) {
@@ -77,13 +92,19 @@ impl Monitor {
                 Instruction::Display(position, obj) => {
                     let pos = cursor::Goto(position.x, position.y);
                     match obj {
-                        DisplayObject::Empty => write!(stdout, "{}{} ", color::Fg(color::Reset), pos),
+                        DisplayObject::Empty => {
+                            write!(stdout, "{}{} ", color::Fg(color::Reset), pos)
+                        }
                         DisplayObject::Ball => write!(stdout, "{}{}●", color::Fg(color::Blue), pos),
-                        DisplayObject::Wall => write!(stdout, "{}{}█", color::Fg(color::Rgb(211, 211, 211)), pos),
+                        DisplayObject::Wall => {
+                            write!(stdout, "{}{}█", color::Fg(color::Rgb(211, 211, 211)), pos)
+                        }
                         DisplayObject::Block => write!(stdout, "{}{}█", color::Fg(color::Red), pos),
-                        DisplayObject::HorizPaddle => write!(stdout, "{}{}━", color::Fg(color::Yellow), pos),
+                        DisplayObject::HorizPaddle => {
+                            write!(stdout, "{}{}━", color::Fg(color::Yellow), pos)
+                        }
                     };
-                },
+                }
                 _ => {}
             }
         }

@@ -1,8 +1,4 @@
-use lib::int_code::{
-    machine::Machine,
-    monitor::Monitor,
-    read_file,
-};
+use lib::int_code::{machine::Machine, monitor::Monitor, read_file};
 use std::sync::mpsc;
 use std::thread;
 
