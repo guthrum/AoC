@@ -8,7 +8,7 @@ pub fn read_file(path: &str) -> io::Result<String> {
     fs::read_to_string(path)
 }
 
-fn draw_image(img: &Vec<Vec<i32>>) {
+fn draw_image(img: &[Vec<i32>]) {
     for row in img {
         for pixel in row {
             if pixel == &1 {

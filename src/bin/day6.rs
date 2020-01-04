@@ -76,14 +76,11 @@ impl System {
                 .get(current_com)
                 .expect("no entry found")
                 .to_owned();
-            match com_to_orbitors.get(current_com) {
-                Some(orbitors) => {
-                    for orbitor in orbitors {
-                        com_stack.push_front(orbitor);
-                        com_orbit_count.insert(orbitor, current_com_count + 1);
-                    }
+            if let Some(oribitors) = com_to_orbitors.get(current_com) {
+                for orbitor in oribitors {
+                    com_stack.push_front(orbitor);
+                    com_orbit_count.insert(orbitor, current_com_count + 1);
                 }
-                None => {}
             }
         }
 
@@ -117,32 +114,29 @@ impl System {
             let mut min_distance_you = std::i32::MAX;
 
             let current_com = com_stack.front().unwrap().to_owned();
-            match com_to_orbitors.get(current_com) {
-                Some(orbitors) => {
-                    for orbitor in orbitors {
-                        if orbitor == &&san {
-                            min_distance_san = 0;
-                        } else if orbitor == &&you {
-                            min_distance_you = 0;
-                        } else {
-                            match planet_hops_to_dest.get(orbitor) {
-                                Some((distance_san, distance_you)) => {
-                                    if distance_san < &min_distance_san {
-                                        min_distance_san = distance_san.to_owned() + 1;
-                                    }
-                                    if distance_you < &min_distance_you {
-                                        min_distance_you = distance_you.to_owned() + 1;
-                                    }
+            if let Some(orbitors) = com_to_orbitors.get(current_com) {
+                for orbitor in orbitors {
+                    if orbitor == &&san {
+                        min_distance_san = 0;
+                    } else if orbitor == &&you {
+                        min_distance_you = 0;
+                    } else {
+                        match planet_hops_to_dest.get(orbitor) {
+                            Some((distance_san, distance_you)) => {
+                                if *distance_san < min_distance_san {
+                                    min_distance_san = *distance_san + 1;
                                 }
-                                None => {
-                                    evaluated_all = false;
-                                    com_stack.push_front(orbitor);
+                                if *distance_you < min_distance_you {
+                                    min_distance_you = *distance_you + 1;
                                 }
+                            }
+                            None => {
+                                evaluated_all = false;
+                                com_stack.push_front(orbitor);
                             }
                         }
                     }
                 }
-                None => {}
             }
 
             if evaluated_all {

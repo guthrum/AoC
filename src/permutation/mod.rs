@@ -1,7 +1,7 @@
 fn _perm2(input: Vec<i64>) -> Vec<Vec<i64>> {
     let f = input[0];
     let s = input[1];
-    vec![vec![f.clone(), s.clone()], vec![s, f]]
+    vec![vec![f, s], vec![s, f]]
 }
 
 fn _recursive_perm(mut input: Vec<i64>) -> Vec<Vec<i64>> {

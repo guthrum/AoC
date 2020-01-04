@@ -52,7 +52,7 @@ fn main() {
         read_file("/home/tim/projects/AoC19/resources/day2input").expect("unable to load numbers"),
         noun,
         verb,
-    ) != 19690720
+    ) != 19_690_720
     {
         if noun == 99 {
             noun = 0;

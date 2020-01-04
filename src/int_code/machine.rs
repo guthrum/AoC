@@ -1,7 +1,5 @@
-use std::convert::TryFrom;
 use std::sync::mpsc::{Receiver, Sender};
 
-static INSTRUCTION_LENGTH: usize = 5;
 static MEMORY_SIZE: usize = 4096;
 
 #[derive(Copy, Clone, Debug)]
@@ -180,7 +178,7 @@ impl Machine {
         // println!("read: {:?} {}", addressing_mode, self.relative_base);
         match self.input.recv() {
             Ok(input) => self._write_memory(addressing_mode, input),
-            Err(_) => panic!("input closed before machine finished"),
+            Err(e) => panic!("input closed before machine finished {}", e),
         }
     }
 
@@ -188,7 +186,7 @@ impl Machine {
         // println!("write: {:?} {}", addressing_mode, self.relative_base);
         match self.output.send(self._read_memory(addressing_mode)) {
             Ok(()) => {}
-            Err(e) => panic!(format!("failed to send data: {}", e)),
+            Err(e) => panic!("failed to send data: {}", e),
         }
     }
 
