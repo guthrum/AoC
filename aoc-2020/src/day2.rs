@@ -28,14 +28,13 @@ fn matches_policy_1(password_policy: &PolicyPassword) -> bool {
     let count = password_policy
         .password
         .chars()
-        .into_iter()
         .filter(|c| *c == password_policy.letter)
         .count();
     password_policy.min <= count && count <= password_policy.max
 }
 
 fn part_1(data: &Vec<PolicyPassword>) -> usize {
-    data.into_iter().filter(|p| matches_policy_1(p)).count()
+    data.iter().filter(|p| matches_policy_1(p)).count()
 }
 
 fn matches_policy_2(password_policy: &PolicyPassword) -> bool {
@@ -46,7 +45,7 @@ fn matches_policy_2(password_policy: &PolicyPassword) -> bool {
 }
 
 fn part_2(data: &Vec<PolicyPassword>) -> usize {
-    data.into_iter().filter(|p| matches_policy_2(p)).count()
+    data.iter().filter(|p| matches_policy_2(p)).count()
 }
 
 fn parse_line(line: String, re: &regex::Regex) -> Option<PolicyPassword> {
@@ -65,7 +64,6 @@ fn main() {
     let re = regex::Regex::new(r"^(\d+)-(\d+) ([A-Za-z]): ([A-Za-z]*)$").unwrap();
     let input: Vec<PolicyPassword> = reader
         .lines()
-        .into_iter()
         .map(|x| x.unwrap())
         .map(|x| parse_line(x, &re).unwrap())
         .collect();
