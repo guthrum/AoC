@@ -47,8 +47,7 @@ fn part_1(data: &Forest) -> usize {
 fn part_2(data: &Forest) -> usize {
     vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
         .iter()
-        .map(|d| count_trees(data, d.0, d.1))
-        .product()
+        .fold(1, |acc, (dx, dy)| acc * count_trees(data, *dx, *dy))
 }
 
 fn main() {
