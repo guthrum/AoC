@@ -12,20 +12,18 @@ struct Options {
     input: PathBuf,
 }
 
-fn convert_to_num(raw: &str, lower_char: char, upper_char: char) -> u8 {
-    let mut upper_bound = (2 << (raw.len() - 1)) - 1;
-    let mut lower_bound = 0;
-    for c in raw.chars() {
-        if c == lower_char {
-            upper_bound = lower_bound + ((upper_bound - lower_bound) / 2);
-        } else if c == upper_char {
-            lower_bound = lower_bound + ((upper_bound - lower_bound) / 2);
-        } else {
-            panic!("unexpected char {}", c);
-        }
-    }
-
-    upper_bound
+fn convert_to_num(raw: &str, upper_char: char) -> u8 {
+    raw.chars()
+        .rev()
+        .enumerate()
+        .map(|(pos, c)| {
+            if c == upper_char {
+                2u8.pow(pos as u32)
+            } else {
+                0
+            }
+        })
+        .sum()
 }
 
 #[derive(Debug, Eq)]
@@ -47,8 +45,8 @@ impl Seat {
 impl From<String> for Seat {
     fn from(raw: String) -> Self {
         Seat {
-            row: convert_to_num(&raw[..7], 'F', 'B'),
-            column: convert_to_num(&raw[7..10], 'L', 'R'),
+            row: convert_to_num(&raw[..7], 'B'),
+            column: convert_to_num(&raw[7..10], 'R'),
         }
     }
 }
