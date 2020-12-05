@@ -46,12 +46,9 @@ impl Seat {
 
 impl From<String> for Seat {
     fn from(raw: String) -> Self {
-        let raw_row = &raw[..7];
-        let raw_col = &raw[7..10];
-
         Seat {
-            row: convert_to_num(raw_row, 'F', 'B'),
-            column: convert_to_num(raw_col, 'L', 'R'),
+            row: convert_to_num(&raw[..7], 'F', 'B'),
+            column: convert_to_num(&raw[7..10], 'L', 'R'),
         }
     }
 }
