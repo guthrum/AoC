@@ -30,6 +30,10 @@ path = "src/day5.rs"
 name = "day6"
 path = "src/day6.rs"
 
+[[bin]]
+name = "day7"
+path = "src/day7.rs"
+
 [dependencies]
 regex = "1"
 structopt = "0.3"
