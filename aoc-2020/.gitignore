@@ -1,3 +1,5 @@
 input
 /target
 **/*.rs.bk
+
+src/day14.rs
