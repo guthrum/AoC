@@ -1,12 +1,10 @@
 use std::fs::read_to_string;
 
 fn get_high_low(values: &Vec<Vec<usize>>, idx: usize) -> (usize, usize) {
-    let [c0, c1] = values.iter()
-        .map(|v| v[idx])
-        .fold([0, 0], |mut acc, v|{
-            acc[v] += 1;
-            acc
-        });
+    let [c0, c1] = values.iter().map(|v| v[idx]).fold([0, 0], |mut acc, v| {
+        acc[v] += 1;
+        acc
+    });
     if c0 > c1 {
         (0, 1)
     } else {
@@ -46,17 +44,11 @@ fn solve(input: &str) -> (usize, usize) {
     for idx in 0..length {
         if high_values.len() != 1 {
             let target = get_high_low(&high_values, idx).0;
-            high_values = high_values
-                .into_iter()
-                .partition(|v| v[idx] == target)
-                .0;
+            high_values = high_values.into_iter().partition(|v| v[idx] == target).0;
         }
         if low_values.len() != 1 {
             let target = get_high_low(&low_values, idx).1;
-            low_values = low_values
-                .into_iter()
-                .partition(|v| v[idx] == target)
-                .0;
+            low_values = low_values.into_iter().partition(|v| v[idx] == target).0;
         }
     }
     let (high_p2, low_p2) = high_values[0]
