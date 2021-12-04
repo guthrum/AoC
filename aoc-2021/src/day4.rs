@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, fs::read_to_string};
+use std::{collections::HashMap, fs::read_to_string};
 
 #[derive(Debug)]
 struct Board {
@@ -47,32 +47,28 @@ impl Board {
 }
 
 fn parse(input: &str) -> (Vec<u8>, Vec<Board>) {
-    let mut lines = input.lines().peekable();
+    let mut lines = input.split("\n\n");
     let call_order: Vec<u8> = lines
         .next()
         .unwrap()
         .split(",")
         .map(|s| u8::from_str_radix(s, 10).unwrap())
         .collect();
-    let mut boards = Vec::new();
-    lines.next();
-    while lines.peek().is_some() {
-        let mut raw_values = Vec::new();
-        while let Some(line) = lines.next() {
-            if line.is_empty() {
-                break;
-            }
-            raw_values.push(line);
-        }
-        let board_values: Vec<Vec<u8>> = raw_values
+    let mut boards = Vec::with_capacity(100);
+    while let Some(board) = lines.next() {
+        let mut board_values = Vec::with_capacity(5);
+        board
+            .lines()
             .into_iter()
             .map(|line| {
+                let mut row_values = Vec::with_capacity(5);
                 line.split(" ")
                     .filter(|v| !v.is_empty())
-                    .map(|v| u8::from_str_radix(v, 10).expect(&format!("failed to parse '{}'", v)))
-                    .collect()
+                    .map(|v| u8::from_str_radix(v, 10).unwrap())
+                    .for_each(|v| row_values.push(v));
+                row_values
             })
-            .collect();
+            .for_each(|v| board_values.push(v));
         boards.push(Board::new(board_values));
     }
 
@@ -81,7 +77,6 @@ fn parse(input: &str) -> (Vec<u8>, Vec<Board>) {
 
 fn solve(input: &str) -> (u64, u64) {
     let (call_order, mut boards) = parse(input);
-    //boards.iter().for_each(|b| println!("board = {:?}", b));
     let mut first_win = None;
     let mut last_win = None;
     let mut call_order_iter = call_order.into_iter().peekable();

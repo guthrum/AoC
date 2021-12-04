@@ -1,11 +1,10 @@
-use std::{fs::read_to_string, num::ParseIntError};
+use std::fs::read_to_string;
 
 fn solve(input: &str) -> (usize, usize) {
-    let values = input
+    let values: Vec<i32> = input
         .lines()
-        .map(|v| i32::from_str_radix(v, 10))
-        .collect::<Result<Vec<i32>, ParseIntError>>()
-        .unwrap();
+        .map(|v| i32::from_str_radix(v, 10).unwrap())
+        .collect();
     let part1 = values
         .iter()
         .skip(1)
