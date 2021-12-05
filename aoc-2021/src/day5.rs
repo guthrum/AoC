@@ -48,7 +48,7 @@ fn points_on_line(p1: (i32, i32), p2: (i32, i32)) -> Box<dyn Iterator<Item = (i3
 
 fn solve(input: &str) -> (usize, usize) {
     let line_sections = parse(input);
-    let mut line_sections_part_1: HashMap<(i32, i32), i32> = HashMap::new();
+    let mut line_sections_part_1: HashMap<(i32, i32), i32> = HashMap::with_capacity(200000);
     line_sections
         .iter()
         .filter(|v| v.0 .0 == v.1 .0 || v.0 .1 == v.1 .1)
@@ -60,7 +60,7 @@ fn solve(input: &str) -> (usize, usize) {
         });
     let res1 = line_sections_part_1.values().filter(|v| **v > 1).count();
 
-    let mut line_sections_part_2: HashMap<(i32, i32), i32> = HashMap::new();
+    let mut line_sections_part_2: HashMap<(i32, i32), i32> = HashMap::with_capacity(200000);
     line_sections
         .into_iter()
         .flat_map(|(p1, p2)| points_on_line(p1, p2).into_iter())
