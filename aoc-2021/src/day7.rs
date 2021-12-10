@@ -1,7 +1,10 @@
 use std::fs::read_to_string;
 
 fn solve_p1(input: &str) -> i32 {
-    let positions: Vec<i32> = input.lines().next().unwrap()
+    let positions: Vec<i32> = input
+        .lines()
+        .next()
+        .unwrap()
         .split(",")
         .map(|v| v.parse().unwrap())
         .collect();
@@ -9,9 +12,7 @@ fn solve_p1(input: &str) -> i32 {
     let max = *positions.iter().max().unwrap();
     let mut cost = i32::MAX;
     for pos in min..=max {
-        let pos_cost = positions.iter()
-            .map(|v| (pos-v).abs())
-            .sum();
+        let pos_cost = positions.iter().map(|v| (pos - v).abs()).sum();
         cost = i32::min(cost, pos_cost);
     }
 
@@ -19,7 +20,10 @@ fn solve_p1(input: &str) -> i32 {
 }
 
 fn solve_p2(input: &str) -> i32 {
-    let positions: Vec<i32> = input.lines().next().unwrap()
+    let positions: Vec<i32> = input
+        .lines()
+        .next()
+        .unwrap()
         .split(",")
         .map(|v| v.parse().unwrap())
         .collect();
@@ -27,10 +31,11 @@ fn solve_p2(input: &str) -> i32 {
     let max = *positions.iter().max().unwrap();
     let mut cost = i32::MAX;
     for pos in min..=max {
-        let pos_cost = positions.iter()
-            .map(|v| (pos-v).abs())
+        let pos_cost = positions
+            .iter()
+            .map(|v| (pos - v).abs())
             .filter(|v| *v != 0)
-            .map(|v| (v*(v+1))/2)
+            .map(|v| (v * (v + 1)) / 2)
             .sum();
         cost = i32::min(cost, pos_cost);
     }

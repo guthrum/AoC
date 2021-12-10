@@ -10,12 +10,13 @@ fn read_coords(p: &str) -> (i32, i32) {
 
 fn parse(input: &str) -> Vec<((i32, i32), (i32, i32))> {
     let mut res = Vec::with_capacity(1000);
-    res.extend(input
-        .lines()
-        .map(|l| {
-            let mut coords = l.split(" -> ");
-            (read_coords(coords.next().unwrap()), read_coords(coords.next().unwrap()))
-        }));
+    res.extend(input.lines().map(|l| {
+        let mut coords = l.split(" -> ");
+        (
+            read_coords(coords.next().unwrap()),
+            read_coords(coords.next().unwrap()),
+        )
+    }));
     res
 }
 

@@ -4,7 +4,7 @@ fn calculate_number(i: u8, days: u32) -> (u8, usize) {
     let mut state = Vec::with_capacity(6703087164);
     state.push(i);
     for _i in 1..=days {
-        let mut append = Vec::with_capacity(state.len()/2);
+        let mut append = Vec::with_capacity(state.len() / 2);
         for v in &mut state {
             if *v == 0 {
                 *v = 6;
@@ -19,7 +19,6 @@ fn calculate_number(i: u8, days: u32) -> (u8, usize) {
     (i, state.len())
 }
 
-
 fn solve(input: &str, days: u32) -> usize {
     let mut counts = [0 as usize; 9];
     for i in 0..=8 {
@@ -29,7 +28,11 @@ fn solve(input: &str, days: u32) -> usize {
     }
     println!("calculations complete");
 
-    input.lines().next().unwrap().split(",")
+    input
+        .lines()
+        .next()
+        .unwrap()
+        .split(",")
         .map(|v| u8::from_str_radix(v, 10).expect(&format!("{} is invalid", v)))
         .map(|v| counts[v as usize])
         .sum()
