@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    fs::read_to_string,
-};
+use std::{collections::HashMap, fs::read_to_string};
 
 fn read_input(path: &str) -> (String, HashMap<(char, char), char>) {
     let raw = read_to_string(path).unwrap();
