@@ -88,11 +88,9 @@ fn get_delta(points: &[Point]) -> HashMap<PointDelta, Vec<(Point, Point)>> {
     let mut res = HashMap::with_capacity(points.len());
 
     for (idx, p) in points.iter().enumerate() {
-        for (idx2, p2) in points.iter().enumerate() {
-            if idx < idx2 {
-                let delta = (p.0 - p2.0, p.1 - p2.1, p.2 - p2.2);
-                res.entry(delta).or_insert(Vec::new()).push((*p, *p2));
-            }
+        for p2 in points.iter().skip(idx + 1) {
+            let delta = (p.0 - p2.0, p.1 - p2.1, p.2 - p2.2);
+            res.entry(delta).or_insert(Vec::new()).push((*p, *p2));
         }
     }
 
@@ -108,13 +106,14 @@ fn solve(input: ScanInfo) -> (usize, i32) {
     let mut to_handle: Vec<u32> = input.keys().cloned().filter(|k| *k != 0).collect();
 
     while !to_handle.is_empty() {
-        let mut still_unsolved = Vec::new();
+        let mut still_unsolved = Vec::with_capacity(to_handle.len());
 
         for scanner_id in to_handle {
             if scanner_id == 0 {
                 continue;
             }
             let scanner_points = input.get(&scanner_id).unwrap();
+            // TODO: we could only calc this once per scanner point, good idea
             let scanner_deltas = get_delta(&scanner_points);
             // track which deltas match for a given rotation?
             let mut tracker: HashMap<[[i32; 3]; 3], Vec<((Point, Point), (Point, Point))>> =
@@ -128,7 +127,7 @@ fn solve(input: ScanInfo) -> (usize, i32) {
                             for p in pair {
                                 tracker
                                     .entry(*rotation)
-                                    .or_insert(Vec::new())
+                                    .or_insert(Vec::with_capacity(200))
                                     .push((*p, *p0_p));
                             }
                         }
@@ -146,7 +145,7 @@ fn solve(input: ScanInfo) -> (usize, i32) {
             let rotation = opt_rotation.unwrap();
             // now to find the location of scanner i, for this we need to find two pairs that have
             // a point in common for both side.
-            let mut point_mapping = HashMap::new();
+            let mut point_mapping = HashMap::with_capacity(rotation.1.len());
             for pair in rotation.1 {
                 point_mapping
                     .entry(pair.1 .0)
@@ -182,6 +181,7 @@ fn solve(input: ScanInfo) -> (usize, i32) {
                 new_p0_points.insert(add_points(rotate_point(*p, &rotation.0), scanner_location));
             }
             p0_points = new_p0_points.into_iter().collect();
+            // TODO: we could do an incremental calc only, instead of complete re-computation
             p0_deltas = get_delta(&p0_points);
         }
 
