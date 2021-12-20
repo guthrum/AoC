@@ -76,6 +76,10 @@ path = "src/day17.rs"
 name = "day19"
 path = "src/day19.rs"
 
+[[bin]]
+name = "day20"
+path = "src/day20.rs"
+
 [dependencies]
 
 [profile.release]
