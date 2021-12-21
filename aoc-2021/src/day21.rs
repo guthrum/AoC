@@ -90,8 +90,8 @@ fn solve_2(p1: u64, p2: u64) -> u64 {
 }
 
 fn main() {
-    let p1 = u64::from_str_radix(&std::env::args().skip(1).next().unwrap(), 10).unwrap();
-    let p2 = u64::from_str_radix(&std::env::args().skip(2).next().unwrap(), 10).unwrap();
+    let p1 = u64::from_str_radix(&std::env::args().nth(1).unwrap(), 10).unwrap();
+    let p2 = u64::from_str_radix(&std::env::args().nth(2).unwrap(), 10).unwrap();
     println!("Part 1 = {}", solve_1(p1, p2));
     println!("Part 2 = {}", solve_2(p1, p2));
 }

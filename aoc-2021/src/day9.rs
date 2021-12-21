@@ -87,7 +87,7 @@ fn solve(input: &Vec<Vec<u8>>) -> (u32, usize) {
         basins.insert(basin_count, done.len());
     }
     let mut basin_sizes: Vec<usize> = basins.values().cloned().collect();
-    basin_sizes.sort();
+    basin_sizes.sort_unstable();
     basin_sizes.reverse();
     let p2 = basin_sizes[0..=2].iter().product();
 
@@ -95,7 +95,7 @@ fn solve(input: &Vec<Vec<u8>>) -> (u32, usize) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(&input);
     println!("Part 1 = {}", p1);

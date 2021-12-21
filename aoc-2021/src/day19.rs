@@ -66,12 +66,12 @@ fn read_input(path: &str) -> ScanInfo {
             10,
         )
         .unwrap();
-        while let Some(line) = lines.next() {
-            if line == "" {
+        for line in lines.by_ref() {
+            if line.is_empty() {
                 break;
             }
             let parts: Vec<i32> = line
-                .split(",")
+                .split(',')
                 .map(|p| i32::from_str_radix(p, 10).unwrap())
                 .collect();
             scan_info
@@ -98,7 +98,7 @@ fn get_delta(points: &[Point]) -> HashMap<PointDelta, Vec<(Point, Point)>> {
 }
 
 fn solve(input: ScanInfo) -> (usize, i32) {
-    let mut p0_points: Vec<(i32, i32, i32)> = input.get(&0).unwrap().iter().cloned().collect();
+    let mut p0_points: Vec<(i32, i32, i32)> = input.get(&0).unwrap().to_vec();
     let mut p0_deltas = get_delta(&p0_points);
     let mut scanner_locations: HashMap<u32, Point> = HashMap::new();
     scanner_locations.insert(0, (0, 0, 0));
@@ -114,7 +114,7 @@ fn solve(input: ScanInfo) -> (usize, i32) {
             }
             let scanner_points = input.get(&scanner_id).unwrap();
             // TODO: we could only calc this once per scanner point, good idea
-            let scanner_deltas = get_delta(&scanner_points);
+            let scanner_deltas = get_delta(scanner_points);
             // track which deltas match for a given rotation?
             let mut tracker: HashMap<[[i32; 3]; 3], Vec<((Point, Point), (Point, Point))>> =
                 HashMap::new();
@@ -157,9 +157,7 @@ fn solve(input: ScanInfo) -> (usize, i32) {
                     .push(pair.0);
             }
             let decision_points = point_mapping
-                .into_iter()
-                .filter(|(_, v)| v.len() >= 2)
-                .next()
+                .into_iter().find(|(_, v)| v.len() >= 2)
                 .unwrap();
             let dp_1 = decision_points.1.get(0).unwrap();
             let dp_2 = decision_points.1.get(1).unwrap();
@@ -200,7 +198,7 @@ fn solve(input: ScanInfo) -> (usize, i32) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);

@@ -51,18 +51,18 @@ fn parse(input: &str) -> (Vec<u8>, Vec<Board>) {
     let call_order: Vec<u8> = lines
         .next()
         .unwrap()
-        .split(",")
+        .split(',')
         .map(|s| u8::from_str_radix(s, 10).unwrap())
         .collect();
     let mut boards = Vec::with_capacity(100);
-    while let Some(board) = lines.next() {
+    for board in lines {
         let mut board_values = Vec::with_capacity(5);
         board
             .lines()
             .into_iter()
             .map(|line| {
                 let mut row_values = Vec::with_capacity(5);
-                line.split(" ")
+                line.split(' ')
                     .filter(|v| !v.is_empty())
                     .map(|v| u8::from_str_radix(v, 10).unwrap())
                     .for_each(|v| row_values.push(v));
@@ -101,7 +101,7 @@ fn solve(input: &str) -> (u64, u64) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let (p1, p2) = solve(&read_to_string(file_path).unwrap());
     println!("Part 1 = {}", p1);
     println!("Part 2 = {}", p2);

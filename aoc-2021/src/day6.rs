@@ -2,7 +2,7 @@ use std::fs::read_to_string;
 
 fn solve(input: &str, days: usize) -> usize {
     let mut fish_life_span_counts = vec![0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for v in input.lines().next().unwrap().split(",") {
+    for v in input.lines().next().unwrap().split(',') {
         let idx = usize::from_str_radix(v, 10).unwrap();
         fish_life_span_counts[idx] += 1;
     }
@@ -17,7 +17,7 @@ fn solve(input: &str, days: usize) -> usize {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let contents = read_to_string(file_path).unwrap();
     println!("Part 1 = {}", solve(&contents, 80));
     println!("Part 2 = {}", solve(&contents, 256));

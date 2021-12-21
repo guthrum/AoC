@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs::read_to_string};
 
 fn read_coords(p: &str) -> (i32, i32) {
-    let mut parts = p.split(",");
+    let mut parts = p.split(',');
     (
         i32::from_str_radix(parts.next().unwrap(), 10).unwrap(),
         i32::from_str_radix(parts.next().unwrap(), 10).unwrap(),
@@ -54,7 +54,7 @@ fn solve(input: &str) -> (usize, usize) {
         .iter()
         .filter(|v| v.0 .0 == v.1 .0 || v.0 .1 == v.1 .1)
         .cloned()
-        .flat_map(|(p1, p2)| points_on_line(p1, p2).into_iter())
+        .flat_map(|(p1, p2)| points_on_line(p1, p2))
         .for_each(|p| {
             let count = line_sections_part_1.entry(p).or_insert(0);
             *count += 1;
@@ -64,7 +64,7 @@ fn solve(input: &str) -> (usize, usize) {
     let mut line_sections_part_2: HashMap<(i32, i32), i32> = HashMap::with_capacity(200000);
     line_sections
         .into_iter()
-        .flat_map(|(p1, p2)| points_on_line(p1, p2).into_iter())
+        .flat_map(|(p1, p2)| points_on_line(p1, p2))
         .for_each(|p| {
             let count = line_sections_part_2.entry(p).or_insert(0);
             *count += 1;
@@ -74,7 +74,7 @@ fn solve(input: &str) -> (usize, usize) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let (p1, p2) = solve(&read_to_string(file_path).unwrap());
     println!("Part 1 = {}", p1);
     println!("Part 2 = {}", p2);

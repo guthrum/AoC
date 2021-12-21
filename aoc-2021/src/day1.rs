@@ -23,7 +23,7 @@ fn solve(input: &str) -> (usize, usize) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let (p1, p2) = solve(&read_to_string(file_path).unwrap());
     println!("Part 1 = {}", p1);
     println!("Part 2 = {}", p2);

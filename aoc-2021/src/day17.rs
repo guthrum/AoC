@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::read_to_string};
+use std::{fs::read_to_string};
 
 fn read_input(path: &str) -> ((i32, i32), (i32, i32)) {
     let input = read_to_string(path)
@@ -7,14 +7,14 @@ fn read_input(path: &str) -> ((i32, i32), (i32, i32)) {
         .next()
         .unwrap()
         .replace("target area: ", "")
-        .to_string();
+        ;
     let mut target_area = input.split(", ");
     let x_range: Vec<i32> = target_area
         .next()
         .unwrap()
         .replace("x=", "")
         .split("..")
-        .map(|s| i32::from_str_radix(s, 10).expect(&format!("failed to parse {}", s)))
+        .map(|s| i32::from_str_radix(s, 10).unwrap_or_else(|_| panic!("failed to parse {}", s)))
         .collect();
     let y_range: Vec<i32> = target_area
         .next()
@@ -67,7 +67,7 @@ fn solve(input: ((i32, i32), (i32, i32))) -> (i32, usize) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::read_to_string};
+use std::{fs::read_to_string};
 
 fn read_input(path: &str) -> Vec<Vec<u8>> {
     read_to_string(path)
@@ -102,7 +102,7 @@ fn print_grid(grid: &Vec<Vec<u8>>) {
         for v in row {
             print!("{}", v);
         }
-        println!("");
+        println!();
     }
 }
 
@@ -112,7 +112,7 @@ fn solve(input: Vec<Vec<u8>>) -> (u32, u32) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);

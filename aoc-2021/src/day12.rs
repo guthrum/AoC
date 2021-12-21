@@ -38,7 +38,7 @@ fn read_input(path: &str) -> Graph {
         .unwrap()
         .lines()
         .map(|line| {
-            let mut parts = line.split("-");
+            let mut parts = line.split('-');
             let source = parts.next().unwrap().to_string();
             let dest = parts.next().unwrap().to_string();
             (source, dest)
@@ -92,16 +92,12 @@ impl Path {
             } else {
                 true
             }
+        } else if !is_lowercase(node) {
+            true
+        } else if self.path.contains(node) {
+            self.small.is_none()
         } else {
-            if !is_lowercase(node) {
-                true
-            } else {
-                if self.path.contains(node) {
-                    self.small.is_none()
-                } else {
-                    true
-                }
-            }
+            true
         }
     }
 }
@@ -131,7 +127,7 @@ fn solve(graph: Graph) -> (usize, usize) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);

@@ -68,17 +68,15 @@ impl Line {
         for c in self.raw.chars() {
             if is_open(c) {
                 stack.push(c);
-            } else {
-                if let Some(opening) = stack.pop() {
-                    if expected_closing(opening) != c {
-                        return State::Corrupted(c);
-                    }
-                } else {
-                    panic!("un-handled");
+            } else if let Some(opening) = stack.pop() {
+                if expected_closing(opening) != c {
+                    return State::Corrupted(c);
                 }
+            } else {
+                panic!("un-handled");
             }
         }
-        if stack.len() == 0 {
+        if stack.is_empty() {
             State::Complete
         } else {
             stack.reverse();
@@ -92,7 +90,7 @@ fn read_input(path: &str) -> Vec<Line> {
     read_to_string(path)
         .unwrap()
         .lines()
-        .map(|line| Line::new(line))
+        .map(Line::new)
         .collect()
 }
 
@@ -103,14 +101,14 @@ fn solve(input: &Vec<Line>) -> (u32, u64) {
         .map(|v| v.state().autocomplete_score())
         .filter(|score| *score > 0)
         .collect();
-    auto_complete_score.sort();
+    auto_complete_score.sort_unstable();
     let p2 = auto_complete_score[auto_complete_score.len() / 2];
 
     (p1, p2)
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(&input);
     println!("Part 1 = {}", p1);

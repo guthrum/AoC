@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashSet},
     fs::read_to_string,
 };
 
@@ -13,23 +13,23 @@ fn read_input(path: &str) -> (HashSet<(i32, i32)>, Vec<Fold>) {
     let raw = read_to_string(path).unwrap();
     let mut lines = raw.lines();
     let mut coords = HashSet::new();
-    while let Some(raw_coord) = lines.next() {
-        if raw_coord == "" {
+    for raw_coord in lines.by_ref() {
+        if raw_coord.is_empty() {
             break;
         }
-        let mut coord = raw_coord.split(",");
+        let mut coord = raw_coord.split(',');
         let x = i32::from_str_radix(coord.next().unwrap(), 10).unwrap();
         let y = i32::from_str_radix(coord.next().unwrap(), 10).unwrap();
         coords.insert((x, y));
     }
 
     let mut folds = Vec::new();
-    while let Some(raw_fold) = lines.next() {
+    for raw_fold in lines {
         let raw = raw_fold.replace("fold along ", "");
-        let value = i32::from_str_radix(raw.split("=").skip(1).next().unwrap(), 10).unwrap();
-        let fold = if raw.starts_with("x") {
+        let value = i32::from_str_radix(raw.split('=').nth(1).unwrap(), 10).unwrap();
+        let fold = if raw.starts_with('x') {
             Fold::X(value)
-        } else if raw.starts_with("y") {
+        } else if raw.starts_with('y') {
             Fold::Y(value)
         } else {
             panic!("cannot handle {}", raw);
@@ -83,14 +83,14 @@ fn solve(input: (HashSet<(i32, i32)>, Vec<Fold>)) -> (usize, usize) {
             let c = if coords.contains(&(x, y)) { "#" } else { "." };
             print!("{}", c);
         }
-        println!("");
+        println!();
     }
 
     (p1.unwrap(), coords.len())
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);

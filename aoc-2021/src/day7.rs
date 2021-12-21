@@ -5,7 +5,7 @@ fn solve_p1(input: &str) -> i32 {
         .lines()
         .next()
         .unwrap()
-        .split(",")
+        .split(',')
         .map(|v| v.parse().unwrap())
         .collect();
     let min = *positions.iter().min().unwrap();
@@ -24,7 +24,7 @@ fn solve_p2(input: &str) -> i32 {
         .lines()
         .next()
         .unwrap()
-        .split(",")
+        .split(',')
         .map(|v| v.parse().unwrap())
         .collect();
     let min = *positions.iter().min().unwrap();
@@ -44,7 +44,7 @@ fn solve_p2(input: &str) -> i32 {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_to_string(file_path).unwrap();
     println!("Part 1 = {}", solve_p1(&input));
     println!("Part 2 = {}", solve_p2(&input));

@@ -1,5 +1,4 @@
 use std::{
-    collections::{HashMap, HashSet},
     fs::read_to_string,
 };
 
@@ -38,7 +37,7 @@ fn read_input(path: &str) -> (Vec<bool>, Vec<Vec<bool>>) {
     }
 
     let mut image = Vec::new();
-    while let Some(line) = lines.next() {
+    for line in lines {
         let row = line
             .chars()
             .map(|c| {
@@ -116,7 +115,7 @@ fn enhance_image(
             let mut ptr = 0;
             let offsets = get_pixels(&image, x as i64, y as i64, default);
             for v in offsets {
-                ptr = ptr << 1;
+                ptr <<= 1;
                 if v {
                     ptr += 1;
                 }
@@ -135,7 +134,7 @@ fn print(image: &Vec<Vec<bool>>) {
             let c = if *v { '#' } else { '.' };
             print!("{}", c);
         }
-        println!("")
+        println!()
     }
 }
 
@@ -152,8 +151,8 @@ fn solve(input: (Vec<bool>, Vec<Vec<bool>>), rounds: u32) -> usize {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&file_path);
     println!("Part 1 = {}", solve(input.clone(), 2));
-    println!("Part 2 = {}", solve(input.clone(), 50));
+    println!("Part 2 = {}", solve(input, 50));
 }

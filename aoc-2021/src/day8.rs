@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashSet},
     fs::read_to_string,
 };
 
@@ -69,18 +69,16 @@ fn find_a(one: &str, seven: &str) -> char {
 fn find_b_d_g(seven: &str, four: &str, five_count: &Vec<String>) -> (char, char, char) {
     let seven_chars: Vec<char> = seven.chars().collect();
     let three = five_count
-        .iter()
-        .filter(|v| contains_chars(&seven_chars[..], &v))
-        .next()
+        .iter().find(|v| contains_chars(&seven_chars[..], v))
         .unwrap();
-    let three_minus_seven = subtract_strings(&three, seven);
+    let three_minus_seven = subtract_strings(three, seven);
     let four_minus_seven = subtract_strings(four, seven);
     // d is the intersection of the 2
     let mut d = '1';
     let mut g = '1';
     let mut b = '1';
     for c in &three_minus_seven {
-        if four_minus_seven.contains(&c) {
+        if four_minus_seven.contains(c) {
             d = *c;
         } else {
             g = *c;
@@ -99,18 +97,14 @@ fn find_b_d_g(seven: &str, four: &str, five_count: &Vec<String>) -> (char, char,
 fn find_c_e_f(b: char, one: &str, seven: &str, five_count: &Vec<String>) -> (char, char, char) {
     let seven_chars: Vec<char> = seven.chars().collect();
     let three = five_count
-        .iter()
-        .filter(|v| contains_chars(&seven_chars[..], &v))
-        .next()
+        .iter().find(|v| contains_chars(&seven_chars[..], v))
         .unwrap();
     let five = five_count
-        .iter()
-        .filter(|v| contains_chars(&[b], &v))
-        .next()
+        .iter().find(|v| contains_chars(&[b], v))
         .unwrap();
     let mut five_minus_3_minus_one: HashSet<char> = subtract_strings(
-        &five,
-        &subtract_strings(&three, one)
+        five,
+        &subtract_strings(three, one)
             .to_vec()
             .iter()
             .collect::<String>(),
@@ -123,11 +117,9 @@ fn find_c_e_f(b: char, one: &str, seven: &str, five_count: &Vec<String>) -> (cha
     let c = subtract_strings(one, &format!("{}", f))[0];
     let two = five_count
         .iter()
-        .filter(|v| contains_chars(&[c], &v))
-        .filter(|v| !contains_chars(&[f], &v))
-        .next()
+        .filter(|v| contains_chars(&[c], v)).find(|v| !contains_chars(&[f], v))
         .unwrap();
-    let e = subtract_strings(&two, &three)[0];
+    let e = subtract_strings(two, three)[0];
     (c, e, f)
 }
 
@@ -191,13 +183,13 @@ fn read_input(input: &str) -> Vec<(Vec<String>, Vec<String>)> {
         let inputs: Vec<String> = parts
             .next()
             .unwrap()
-            .split(" ")
+            .split(' ')
             .map(|v| v.to_owned())
             .collect();
         let outputs: Vec<String> = parts
             .next()
             .unwrap()
-            .split(" ")
+            .split(' ')
             .map(|v| v.to_owned())
             .collect();
         (inputs, outputs)
@@ -211,7 +203,7 @@ fn solve_single(input: Vec<String>, output: Vec<String>) -> (usize, u64) {
         .iter()
         .filter(|s| possible_digits(s).len() == 1)
         .count();
-    let mut all: Vec<String> = input.clone();
+    let mut all: Vec<String> = input;
     all.extend_from_slice(&output);
 
     let digits = find_parts(all);
@@ -223,7 +215,7 @@ fn solve_single(input: Vec<String>, output: Vec<String>) -> (usize, u64) {
             &digits
                 .iter()
                 .find(|d| d.1 == digit_set)
-                .expect(&format!("not able to find something for {:?}", digit_set))
+                .unwrap_or_else(|| panic!("not able to find something for {:?}", digit_set))
                 .0
         })
         .fold(0, |curr, digit| (curr * 10) + digit.as_u64());
@@ -241,7 +233,7 @@ fn solve(input: Vec<(Vec<String>, Vec<String>)>) -> (usize, u64) {
 }
 
 fn main() {
-    let file_path = std::env::args().skip(1).next().unwrap();
+    let file_path = std::env::args().nth(1).unwrap();
     let input = read_input(&read_to_string(file_path).unwrap());
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);

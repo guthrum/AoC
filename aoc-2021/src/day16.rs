@@ -81,7 +81,7 @@ impl Packet {
             (read, Data::Value(data))
         } else if &rest[0..=0] == "0" {
             let raw_count = &rest[1..=15];
-            let count = usize::from_str_radix(&raw_count, 2).unwrap();
+            let count = usize::from_str_radix(raw_count, 2).unwrap();
             let next_raw = &rest[16..=(count + 16)];
             let mut total_read = 0;
             let mut packets = Vec::new();
@@ -93,7 +93,7 @@ impl Packet {
             (1 + 15 + count, Data::Operator(type_id, packets))
         } else if &rest[0..=0] == "1" {
             let raw_count = &rest[1..=11];
-            let count = usize::from_str_radix(&raw_count, 2).unwrap();
+            let count = usize::from_str_radix(raw_count, 2).unwrap();
             let next_raw = &rest[12..];
             let mut total_read = 0;
             let mut packets = Vec::new();
@@ -125,7 +125,7 @@ fn solve(input: String) -> (usize, u64) {
 }
 
 fn main() {
-    let input = std::env::args().skip(1).next().unwrap();
+    let input = std::env::args().nth(1).unwrap();
     let (p1, p2) = solve(input);
     println!("Part 1 = {}", p1);
     println!("Part 2 = {}", p2);
