@@ -1,6 +1,6 @@
-use std::collections::HashSet;
+
 use std::fs::read_to_string;
-use std::thread::scope;
+
 
 struct Range {
     start: u32,
@@ -9,7 +9,7 @@ struct Range {
 
 impl From<&str> for Range {
     fn from(raw: &str) -> Self {
-        let mut ends = raw.split("-");
+        let mut ends = raw.split('-');
         let start = u32::from_str_radix(ends.next().unwrap(), 10).unwrap();
         let end = u32::from_str_radix(ends.next().unwrap(), 10).unwrap();
         Self { start, end }
@@ -28,7 +28,7 @@ impl Range {
 }
 
 fn read_line(raw: &str) -> (Range, Range) {
-    let mut ranges = raw.split(",");
+    let mut ranges = raw.split(',');
     let f = Range::from(ranges.next().unwrap());
     let s = Range::from(ranges.next().unwrap());
     (f, s)

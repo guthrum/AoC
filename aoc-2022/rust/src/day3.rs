@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::fs::read_to_string;
-use std::thread::scope;
+
 
 fn read_line(line: &str) -> (HashSet<char>, HashSet<char>) {
     assert_eq!(line.len() % 2, 0);
@@ -10,23 +10,23 @@ fn read_line(line: &str) -> (HashSet<char>, HashSet<char>) {
 }
 
 fn value(c: char) -> u32 {
-    let score = if c.is_uppercase() {
+    
+    if c.is_uppercase() {
         27 + (c as u32) - ('A' as u32)
     } else {
         1 + (c as u32) - ('a' as u32)
-    };
-    score
+    }
 }
 
 fn part_1(input: &Vec<(HashSet<char>, HashSet<char>)>) -> u32 {
     input
         .iter()
-        .map(|(first, second)| first.intersection(&second).next().unwrap().clone())
+        .map(|(first, second)| *first.intersection(second).next().unwrap())
         .map(value)
         .sum()
 }
 
-fn union(mut sets: (HashSet<char>, HashSet<char>)) -> HashSet<char> {
+fn union(sets: (HashSet<char>, HashSet<char>)) -> HashSet<char> {
     let (mut s1, s2) = sets;
     for x in s2 {
         s1.insert(x);
