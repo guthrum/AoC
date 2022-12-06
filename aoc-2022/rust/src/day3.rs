@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use std::fs::read_to_string;
 
-
 fn read_line(line: &str) -> (HashSet<char>, HashSet<char>) {
     assert_eq!(line.len() % 2, 0);
     let first = line.chars().take(line.len() / 2).collect();
@@ -10,7 +9,6 @@ fn read_line(line: &str) -> (HashSet<char>, HashSet<char>) {
 }
 
 fn value(c: char) -> u32 {
-    
     if c.is_uppercase() {
         27 + (c as u32) - ('A' as u32)
     } else {

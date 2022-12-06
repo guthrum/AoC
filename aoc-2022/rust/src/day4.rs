@@ -1,6 +1,4 @@
-
 use std::fs::read_to_string;
-
 
 struct Range {
     start: u32,
