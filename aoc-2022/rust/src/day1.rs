@@ -4,8 +4,8 @@ fn solve(input: &str) -> (i32, i32) {
     let mut values: Vec<i32> = input
         .split("\n\n")
         .map(|v| {
-            v.split("\n")
-                .filter(|v| *v != "")
+            v.split('\n')
+                .filter(|v| v.is_empty())
                 .map(|v| i32::from_str_radix(v, 10).unwrap())
                 .sum()
         })
@@ -14,7 +14,7 @@ fn solve(input: &str) -> (i32, i32) {
 
     let sum_first_3 = values.iter().take(3).sum();
 
-    (*values.get(0).unwrap(), sum_first_3)
+    (*values.first().unwrap(), sum_first_3)
 }
 
 fn main() {

@@ -20,7 +20,7 @@ impl Operation {
 fn read_input(input: &str) -> Vec<Operation> {
     input
         .lines()
-        .map(|line| {
+        .flat_map(|line| {
             if line == "noop" {
                 vec![Operation::Noop]
             } else if let Some(amount) = line.strip_prefix("addx ") {
@@ -30,7 +30,6 @@ fn read_input(input: &str) -> Vec<Operation> {
                 panic!();
             }
         })
-        .flatten()
         .collect()
 }
 
@@ -57,8 +56,37 @@ fn part_1(operations: &[Operation]) -> i64 {
     sum_strength
 }
 
+fn part_2(operations: &[Operation]) {
+    let mut instructions = operations.iter();
+    let mut x = 1;
+    let mut screen = Vec::with_capacity(40 * 6);
+    for cycle in 0..240 {
+        let instruction = instructions.next().unwrap();
+        let adjusted_cycle = cycle % 40;
+        // append to screen
+        let c = if adjusted_cycle == x - 1 || adjusted_cycle == x + 1 || adjusted_cycle == x {
+            '#'
+        } else {
+            '.'
+        };
+        screen.push(c);
+
+        x += instruction.delta_x();
+    }
+
+    for (idx, pixel) in screen.iter().enumerate() {
+        if idx % 40 == 0 {
+            println!()
+        }
+        print!("{}", pixel);
+    }
+    println!();
+    println!();
+}
+
 fn solve(lines: &str) -> (i64, i64) {
     let input = read_input(lines);
+    part_2(&input);
     (part_1(&input), 0)
 }
 
