@@ -5,8 +5,8 @@ fn solve(input: &str) -> (i32, i32) {
         .split("\n\n")
         .map(|v| {
             v.split('\n')
-                .filter(|v| v.is_empty())
-                .map(|v| i32::from_str_radix(v, 10).unwrap())
+                .filter(|v| !v.is_empty())
+                .map(|v| i32::from_str_radix(v, 10).expect(&format!("{} is not i32", v)))
                 .sum()
         })
         .collect();
@@ -26,7 +26,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::solve;
+    use super::solve;
 
     #[test]
     fn example_input() {
