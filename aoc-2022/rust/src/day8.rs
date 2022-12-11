@@ -50,7 +50,7 @@ fn solve_1(mut input: Vec<Vec<Cell>>) -> usize {
     }
 
     // east
-    for mut line in input.iter_mut() {
+    for line in input.iter_mut() {
         let mut max = -1;
         for mut cell in line.iter_mut().rev() {
             cell.max_east = max;
@@ -70,7 +70,7 @@ fn solve_1(mut input: Vec<Vec<Cell>>) -> usize {
     }
 
     // west
-    for mut line in input.iter_mut() {
+    for line in input.iter_mut() {
         let mut max = -1;
         for mut cell in line.iter_mut() {
             cell.max_west = max;
@@ -84,7 +84,7 @@ fn solve_1(mut input: Vec<Vec<Cell>>) -> usize {
 fn solve(input_str: &str) -> (usize, usize) {
     let input = read_input(input_str);
 
-    (solve_1(input.clone()), 0)
+    (solve_1(input), 0)
 }
 
 fn main() {

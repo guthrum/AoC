@@ -6,7 +6,7 @@ fn solve(input: &str) -> (i32, i32) {
         .map(|v| {
             v.split('\n')
                 .filter(|v| !v.is_empty())
-                .map(|v| i32::from_str_radix(v, 10).expect(&format!("{} is not i32", v)))
+                .map(|v| i32::from_str_radix(v, 10).unwrap_or_else(|_| panic!("{} is not i32", v)))
                 .sum()
         })
         .collect();
