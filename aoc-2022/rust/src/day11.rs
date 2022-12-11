@@ -20,13 +20,13 @@ impl Operation {
 impl From<&str> for Operation {
     fn from(s: &str) -> Self {
         if let Some(add) = s.strip_prefix("old + ") {
-            Self::Add(u64::from_str_radix(add, 10).expect(&format!("{} is invalid add ", add)))
+            Self::Add(u64::from_str_radix(add, 10).unwrap_or_else(|_| panic!("{} is invalid add ", add)))
         } else if s == "old * old" {
             Self::Square
         } else if let Some(multiply) = s.strip_prefix("old * ") {
             Self::Multiply(
                 u64::from_str_radix(multiply, 10)
-                    .expect(&format!("{} is invalid multiply", multiply)),
+                    .unwrap_or_else(|_| panic!("{} is invalid multiply", multiply)),
             )
         } else {
             panic!("{} is not known", s);
@@ -48,12 +48,11 @@ struct Monkey {
 impl From<&str> for Monkey {
     fn from(l: &str) -> Self {
         let lines: Vec<&str> = l.lines().collect();
-        let id = lines
-            .get(0)
+        let id = lines.first()
             .unwrap()
             .strip_prefix("Monkey ")
             .unwrap()
-            .split(":")
+            .split(':')
             .next()
             .unwrap();
         let items = lines
@@ -61,8 +60,8 @@ impl From<&str> for Monkey {
             .unwrap()
             .strip_prefix("  Starting items:")
             .unwrap()
-            .replace(" ", "")
-            .split(",")
+            .replace(' ', "")
+            .split(',')
             .map(|i| u64::from_str_radix(i, 10).unwrap())
             .collect();
         let operation = lines
@@ -99,7 +98,7 @@ impl From<&str> for Monkey {
 }
 
 impl Monkey {
-    fn run(&mut self) -> Vec<(usize, u64)> {
+    fn run1(&mut self) -> Vec<(usize, u64)> {
         let mut res = Vec::new();
         while let Some(item) = self.items.pop() {
             self.inspection_count += 1;
@@ -113,16 +112,31 @@ impl Monkey {
         }
         res
     }
+
+    fn run2(&mut self, lcm: u64) -> Vec<(usize, u64)> {
+        let mut res = Vec::new();
+        while let Some(item) = self.items.pop() {
+            self.inspection_count += 1;
+            let new_value = self.operation.evaluate(item) % lcm;
+            let monkey = if new_value % self.divisible_test == 0 {
+                self.true_monkey
+            } else {
+                self.false_monkey
+            };
+            res.push((monkey, new_value));
+        }
+        res
+    }
 }
 
 fn read_input(input: &str) -> Vec<Monkey> {
-    input.split("\n\n").map(|l| Monkey::from(l)).collect()
+    input.split("\n\n").map(Monkey::from).collect()
 }
 
 fn solve_1(mut monkeys: Vec<Monkey>) -> usize {
-    for i in 1..=20 {
-        for mut idx in 0..monkeys.len() {
-            let destinations = monkeys.get_mut(idx).unwrap().run();
+    for _i in 1..=20 {
+        for idx in 0..monkeys.len() {
+            let destinations = monkeys.get_mut(idx).unwrap().run1();
             for (monkey, value) in destinations {
                 monkeys.get_mut(monkey).unwrap().items.push(value);
             }
@@ -131,12 +145,28 @@ fn solve_1(mut monkeys: Vec<Monkey>) -> usize {
 
     let mut res: Vec<usize> = monkeys.iter().map(|m| m.inspection_count).collect();
     res.sort_by(|a, b| b.cmp(a));
-    res.get(0).unwrap() * res.get(1).unwrap()
+    res.first().unwrap() * res.get(1).unwrap()
 }
 
-fn solve(lines: &str) -> (usize, i64) {
+fn solve_2(mut monkeys: Vec<Monkey>) -> usize {
+    let lcm = monkeys.iter().map(|m| m.divisible_test).product();
+    for _i in 1..=10_000 {
+        for idx in 0..monkeys.len() {
+            let destinations = monkeys.get_mut(idx).unwrap().run2(lcm);
+            for (monkey, value) in destinations {
+                monkeys.get_mut(monkey).unwrap().items.push(value);
+            }
+        }
+    }
+
+    let mut res: Vec<usize> = monkeys.iter().map(|m| m.inspection_count).collect();
+    res.sort_by(|a, b| b.cmp(a));
+    res.first().unwrap() * res.get(1).unwrap()
+}
+
+fn solve(lines: &str) -> (usize, usize) {
     let input = read_input(lines);
-    (solve_1(input.clone()), 0)
+    (solve_1(input.clone()), solve_2(input))
 }
 
 fn main() {
@@ -179,6 +209,6 @@ Monkey 3:
   Test: divisible by 17
     If true: throw to monkey 0
     If false: throw to monkey 1"#;
-        assert_eq!(solve(input), (10605, 0));
+        assert_eq!(solve(input), (10605, 2713310158));
     }
 }
