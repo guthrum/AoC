@@ -20,7 +20,9 @@ impl Operation {
 impl From<&str> for Operation {
     fn from(s: &str) -> Self {
         if let Some(add) = s.strip_prefix("old + ") {
-            Self::Add(u64::from_str_radix(add, 10).unwrap_or_else(|_| panic!("{} is invalid add ", add)))
+            Self::Add(
+                u64::from_str_radix(add, 10).unwrap_or_else(|_| panic!("{} is invalid add ", add)),
+            )
         } else if s == "old * old" {
             Self::Square
         } else if let Some(multiply) = s.strip_prefix("old * ") {
@@ -48,7 +50,8 @@ struct Monkey {
 impl From<&str> for Monkey {
     fn from(l: &str) -> Self {
         let lines: Vec<&str> = l.lines().collect();
-        let id = lines.first()
+        let id = lines
+            .first()
             .unwrap()
             .strip_prefix("Monkey ")
             .unwrap()
