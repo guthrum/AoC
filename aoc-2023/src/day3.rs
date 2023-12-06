@@ -130,6 +130,6 @@ mod tests {
 ......755.
 ...$.*....
 .664.598.."#;
-        assert_eq!(solve(input), (4361, 0));
+        assert_eq!(solve(input), (4361, 467835));
     }
 }
