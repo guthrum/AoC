@@ -27,11 +27,9 @@ fn part_1(n1: &Vec<u32>, n2: &Vec<u32>) -> u32 {
 }
 
 fn part_2(n1: &Vec<u32>, n2: &Vec<u32>) -> u32 {
-    let mut count1 = HashMap::new();
     let mut count2 = HashMap::new();
-    for (first, second) in n1.iter().zip(n2) {
-        *count1.entry(*first).or_insert(0u32) += 1;
-        *count2.entry(*second).or_insert(0u32) += 1;
+    for n in n2.iter() {
+        *count2.entry(*n).or_insert(0u32) += 1;
     }
     n1.iter()
         .map(|key| key * count2.get(key).unwrap_or(&0))
