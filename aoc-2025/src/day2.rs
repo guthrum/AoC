@@ -27,10 +27,11 @@ fn check_invalid(chars: &[char], split_count: usize) -> bool {
 }
 
 fn number_invalid_p1(n: u64) -> bool {
-    let chars: Vec<char> = n.to_string().chars().collect();
-    if chars.len() % 2 != 0 {
+    let s = n.to_string();
+    if s.len() % 2 != 0 {
         false
     } else {
+        let chars: Vec<char> = s.chars().collect();
         check_invalid(&chars, 2)
     }
 }

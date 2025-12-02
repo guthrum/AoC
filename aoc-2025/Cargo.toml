@@ -13,3 +13,6 @@ name = "day2"
 path = "src/day2.rs"
 
 [dependencies]
+
+[profile.release]
+debug = true
