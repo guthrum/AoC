@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 #[derive(Copy, Clone)]
 enum Op {
     Add,
